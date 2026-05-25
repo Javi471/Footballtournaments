@@ -5,7 +5,11 @@
       "Bash(pip install *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Javier\\\\Desktop\\\\Arte-main\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "Bash(git commit -m ' *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(mvnw.cmd spring-boot:run)"
     ]
   }
 }

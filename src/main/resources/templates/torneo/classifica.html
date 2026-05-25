@@ -12,18 +12,29 @@
         </div>
     </div>
 
-    <!-- React app monta qui la classifica dinamica -->
-    <div id="classifica-root" th:data-torneo-id="${torneo.id}"></div>
+    <div class="alert alert-info" style="margin-bottom:1.5rem;">
+        ⚽ La classifica è gestita da React.
+        Assicurati che il frontend sia in esecuzione su
+        <strong>http://localhost:5173</strong>
+        (<code>cd frontend &amp;&amp; npm run dev</code>)
+    </div>
 
-    <!-- Fallback statico se React non carica -->
+    <!-- Redirige a la app React pasando el torneoId en la URL -->
+    <script th:inline="javascript">
+        const torneoId = /*[[${torneo.id}]]*/ null;
+        window.location.href = `http://localhost:5173/classifica/${torneoId}`;
+    </script>
+
     <noscript>
-        <p class="alert alert-error">JavaScript necessario per visualizzare la classifica.</p>
+        <p class="alert alert-error">
+            JavaScript es necesario. Accede directamente a
+            <a th:href="'http://localhost:5173/classifica/' + ${torneo.id}">
+                http://localhost:5173/classifica/<span th:text="${torneo.id}"></span>
+            </a>
+        </p>
     </noscript>
 </div>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
-
-<!-- React bundle -->
-<script type="module" th:src="@{/react/classifica.js}"></script>
 </body>
 </html>

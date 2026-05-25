@@ -24,9 +24,6 @@ target/
 frontend/node_modules/
 frontend/dist/
 
-# React build output (served by Spring Boot)
-src/main/resources/static/react/
-
 # OS
 .DS_Store
 Thumbs.db
