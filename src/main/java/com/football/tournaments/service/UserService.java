@@ -36,11 +36,26 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User registra(String username, String password) {
+    public User registra(String username, String email, String password) {
+        // Username uniqueness
         if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username già in uso");
+            throw new IllegalArgumentException("Username already taken. Please choose a different one.");
         }
-        User user = new User(username, passwordEncoder.encode(password), UserRole.USER);
+        // Email uniqueness
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("An account with this email already exists.");
+        }
+        // Password strength: min 6 chars, at least 1 uppercase, at least 1 digit
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters long.");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
+        }
+        if (!password.matches(".*[0-9].*")) {
+            throw new IllegalArgumentException("Password must contain at least one number.");
+        }
+        User user = new User(username, email, passwordEncoder.encode(password), UserRole.USER);
         return userRepository.save(user);
     }
 

@@ -26,8 +26,8 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.count() > 0) return;
 
         // Utenti
-        userRepository.save(new User("admin", passwordEncoder.encode("admin123"), UserRole.ADMIN));
-        userRepository.save(new User("user1", passwordEncoder.encode("user123"), UserRole.USER));
+        userRepository.save(new User("admin", "admin@football.com", passwordEncoder.encode("Admin123"), UserRole.ADMIN));
+        userRepository.save(new User("user1", "user1@football.com", passwordEncoder.encode("User1234"), UserRole.USER));
 
         // Torneo
         Torneo torneo = torneoRepository.save(new Torneo("Serie A Amatoriale", 2026, "Torneo amatoriale primaverile"));
