@@ -37,12 +37,27 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User registra(String username, String email, String password) {
+        // Username blank
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be empty.");
+        }
+        // Email blank / format
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be empty.");
+        }
+        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("Please enter a valid email address.");
+        }
+        // Password blank
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be empty.");
+        }
         // Username uniqueness
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already taken. Please choose a different one.");
         }
         // Email uniqueness
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmail(email.toLowerCase())) {
             throw new IllegalArgumentException("An account with this email already exists.");
         }
         // Password strength: min 6 chars, at least 1 uppercase, at least 1 digit
@@ -55,7 +70,7 @@ public class UserService implements UserDetailsService {
         if (!password.matches(".*[0-9].*")) {
             throw new IllegalArgumentException("Password must contain at least one number.");
         }
-        User user = new User(username, email, passwordEncoder.encode(password), UserRole.USER);
+        User user = new User(username, email.toLowerCase(), passwordEncoder.encode(password), UserRole.USER);
         return userRepository.save(user);
     }
 
