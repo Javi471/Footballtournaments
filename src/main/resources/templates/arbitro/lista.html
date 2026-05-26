@@ -4,36 +4,54 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Arbitri</h1>
-        <a th:href="@{/arbitri/nuovo}" class="btn btn-primary">+ Nuovo Arbitro</a>
+<!-- Hero stripe -->
+<div class="hero-stripe">
+    <svg class="stripe-svg" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,200 400,0 1440,0 1440,200" fill="rgba(43,183,168,.06)"/>
+        <polygon points="0,200 700,60 1440,120 1440,200" fill="rgba(43,183,168,.03)"/>
+    </svg>
+    <div class="hero-inner">
+        <div class="page-header">
+            <div class="page-header-left">
+                <span class="eyebrow">⚖️ Corpo Arbitrale</span>
+                <h1 class="page-title">Arbitri</h1>
+                <p class="page-subtitle">Registro ufficiale degli arbitri</p>
+            </div>
+            <a th:href="@{/arbitri/nuovo}" class="btn btn-primary">+ Nuovo Arbitro</a>
+        </div>
     </div>
+</div>
 
+<div class="page-wrapper">
     <div th:if="${#lists.isEmpty(arbitri)}" class="empty-state">
+        <div class="empty-icon">⚖️</div>
         <p>Nessun arbitro registrato.</p>
     </div>
 
-    <table class="table" th:unless="${#lists.isEmpty(arbitri)}">
-        <thead>
-            <tr>
-                <th>Cognome</th>
-                <th>Nome</th>
-                <th>Codice Arbitrale</th>
-                <th>Azioni</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="a : ${arbitri}">
-                <td th:text="${a.cognome}"></td>
-                <td th:text="${a.nome}"></td>
-                <td><span class="badge" th:text="${a.codiceArbitrale}"></span></td>
-                <td>
-                    <a th:href="@{/arbitri/{id}/modifica(id=${a.id})}" class="btn btn-sm">Modifica</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(arbitri)}">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cognome</th>
+                    <th>Nome</th>
+                    <th>Codice Arbitrale</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="a : ${arbitri}">
+                    <td th:text="${a.cognome}"></td>
+                    <td th:text="${a.nome}"></td>
+                    <td><span class="badge badge-teal" th:text="${a.codiceArbitrale}"></span></td>
+                    <td>
+                        <a th:href="@{/arbitri/{id}/modifica(id=${a.id})}" class="btn btn-ghost btn-sm">
+                            Modifica
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

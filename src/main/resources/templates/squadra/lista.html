@@ -5,30 +5,49 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Squadre</h1>
-        <a th:href="@{/squadre/nuova}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">+ Nuova Squadra</a>
+<!-- Hero stripe -->
+<div class="hero-stripe">
+    <svg class="stripe-svg" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,200 400,0 1440,0 1440,200" fill="rgba(43,183,168,.06)"/>
+        <polygon points="0,200 700,60 1440,120 1440,200" fill="rgba(43,183,168,.03)"/>
+    </svg>
+    <div class="hero-inner">
+        <div class="page-header">
+            <div class="page-header-left">
+                <span class="eyebrow">👕 Rose & Giocatori</span>
+                <h1 class="page-title">Squadre</h1>
+                <p class="page-subtitle">Tutte le squadre registrate</p>
+            </div>
+            <a th:href="@{/squadre/nuova}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">
+                + Nuova Squadra
+            </a>
+        </div>
     </div>
+</div>
 
+<div class="page-wrapper">
     <div th:if="${#lists.isEmpty(squadre)}" class="empty-state">
-        <p>Nessuna squadra registrata.</p>
+        <div class="empty-icon">👕</div>
+        <p>Nessuna squadra registrata al momento.</p>
     </div>
 
     <div class="card-grid">
         <div class="card" th:each="s : ${squadre}">
+            <div class="card-accent-bar"></div>
             <div class="card-body">
+                <div class="card-meta" th:text="${s.citta}"></div>
                 <h3 class="card-title" th:text="${s.nome}"></h3>
-                <p class="card-subtitle" th:text="${s.citta}"></p>
-                <p class="card-text" th:text="'Fondata nel ' + ${s.annoFondazione}"></p>
+                <p class="card-text">
+                    Fondata nel <strong style="color:#fff" th:text="${s.annoFondazione}"></strong>
+                </p>
             </div>
             <div class="card-footer">
-                <a th:href="@{/squadre/{id}(id=${s.id})}" class="btn btn-secondary">Rosa</a>
-                <div sec:authorize="hasRole('ADMIN')" class="admin-actions">
-                    <a th:href="@{/squadre/{id}/modifica(id=${s.id})}" class="btn btn-sm">Modifica</a>
+                <a th:href="@{/squadre/{id}(id=${s.id})}" class="btn btn-primary btn-sm">Rosa</a>
+                <div sec:authorize="hasRole('ADMIN')" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
+                    <a th:href="@{/squadre/{id}/modifica(id=${s.id})}" class="btn btn-ghost btn-sm">Modifica</a>
                     <form th:action="@{/squadre/{id}/elimina(id=${s.id})}" method="post" style="display:inline"
                           onsubmit="return confirm('Eliminare questa squadra?')">
-                        <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                     </form>
                 </div>
             </div>

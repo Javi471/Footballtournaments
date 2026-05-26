@@ -40,7 +40,7 @@ public class SecurityConfig {
             }))
             .authorizeHttpRequests(auth -> auth
                 // Pubblico
-                .requestMatchers("/", "/tornei", "/tornei/**").permitAll()
+                .requestMatchers("/", "/tornei", "/tornei/**", "/index").permitAll()
                 .requestMatchers("/squadre", "/squadre/**").permitAll()
                 .requestMatchers("/partite/**").permitAll()
                 .requestMatchers("/login", "/register").permitAll()

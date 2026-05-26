@@ -4,8 +4,13 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
+<div class="page-wrapper">
     <div class="form-card">
+        <nav class="breadcrumb" style="margin-bottom:20px">
+            <a th:href="@{/tornei}">Tornei</a>
+            <span>›</span>
+            <span th:text="${torneo.id != null} ? 'Modifica Torneo' : 'Nuovo Torneo'"></span>
+        </nav>
         <h2 th:text="${torneo.id != null} ? 'Modifica Torneo' : 'Nuovo Torneo'"></h2>
 
         <form th:action="${torneo.id != null} ? @{/tornei/{id}/modifica(id=${torneo.id})} : @{/tornei/nuovo}"
@@ -13,19 +18,20 @@
 
             <div class="form-group">
                 <label>Nome *</label>
-                <input type="text" th:field="*{nome}" required/>
-                <span class="error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                <input type="text" th:field="*{nome}" required placeholder="Es. Torneo Primavera 2026"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
             </div>
 
             <div class="form-group">
                 <label>Anno *</label>
-                <input type="number" th:field="*{anno}" required min="2000" max="2100"/>
-                <span class="error" th:if="${#fields.hasErrors('anno')}" th:errors="*{anno}"></span>
+                <input type="number" th:field="*{anno}" required min="2000" max="2100" placeholder="2026"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('anno')}" th:errors="*{anno}"></span>
             </div>
 
             <div class="form-group">
                 <label>Descrizione</label>
-                <textarea th:field="*{descrizione}" rows="4"></textarea>
+                <textarea th:field="*{descrizione}" rows="4"
+                          placeholder="Descrizione del torneo, regole, premi..."></textarea>
             </div>
 
             <div class="form-group">
@@ -40,8 +46,8 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/tornei}" class="btn btn-outline">Annulla</a>
-                <button type="submit" class="btn btn-primary">Salva</button>
+                <a th:href="@{/tornei}" class="btn btn-ghost">Annulla</a>
+                <button type="submit" class="btn btn-primary">Salva Torneo</button>
             </div>
         </form>
     </div>

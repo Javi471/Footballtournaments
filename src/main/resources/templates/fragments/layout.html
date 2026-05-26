@@ -11,7 +11,19 @@
 
 <nav th:fragment="navbar">
     <div class="navbar">
-        <a class="navbar-brand" th:href="@{/tornei}">⚽ Football Tournaments</a>
+        <a class="logo" th:href="@{/tornei}">
+            <div class="logo-mark">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="7.5" stroke="white" stroke-width="1.4"/>
+                    <polygon points="10,3 12.5,7 10,8.5 7.5,7" fill="white" opacity=".9"/>
+                    <polygon points="10,8.5 14,10 13,14 10,15 7,14 6,10" fill="white" opacity=".45"/>
+                </svg>
+            </div>
+            <div class="logo-text">
+                <span class="lt1">FOOTBALL</span>
+                <span class="lt2">TOURNAMENTS</span>
+            </div>
+        </a>
         <ul class="nav-links">
             <li><a th:href="@{/tornei}">Tornei</a></li>
             <li><a th:href="@{/squadre}">Squadre</a></li>
@@ -24,18 +36,23 @@
             </li>
             <li sec:authorize="isAuthenticated()">
                 <form th:action="@{/logout}" method="post" style="display:inline">
-                    <button type="submit" class="btn-link">Logout (<span sec:authentication="name"></span>)</button>
+                    <button type="submit" class="btn-link">
+                        Logout (<span sec:authentication="name"></span>)
+                    </button>
                 </form>
             </li>
             <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}">Login</a></li>
-            <li sec:authorize="!isAuthenticated()"><a th:href="@{/register}">Registrati</a></li>
+            <li sec:authorize="!isAuthenticated()">
+                <a th:href="@{/register}" class="btn btn-primary btn-sm">Registrati</a>
+            </li>
         </ul>
     </div>
 </nav>
 
 <footer th:fragment="footer">
     <div class="footer">
-        <p>⚽ Football Tournaments &copy; 2026 — Sistema Informativo su Web</p>
+        <span class="footer-logo">⚽ FOOTBALL TOURNAMENTS</span>
+        <span>Sistema Informativo su Web &copy; 2026</span>
     </div>
 </footer>
 

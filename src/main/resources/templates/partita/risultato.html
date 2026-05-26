@@ -4,27 +4,39 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
+<div class="page-wrapper" style="max-width:600px">
     <div class="form-card">
+        <nav class="breadcrumb" style="margin-bottom:20px">
+            <a th:href="@{/tornei}">Tornei</a>
+            <span>›</span>
+            <a th:href="@{/partite/{id}(id=${partita.id})}">Partita</a>
+            <span>›</span>
+            <span>Inserisci Risultato</span>
+        </nav>
         <h2>Inserisci Risultato</h2>
 
-        <div class="match-summary">
-            <span class="team-name" th:text="${partita.squadraHome.nome}"></span>
-            <span class="vs">VS</span>
-            <span class="team-name" th:text="${partita.squadraAway.nome}"></span>
+        <!-- Match header in form -->
+        <div style="text-align:center;background:var(--ink-3);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:28px">
+            <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff"
+                      th:text="${partita.squadraHome.nome}"></span>
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted)">VS</span>
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff"
+                      th:text="${partita.squadraAway.nome}"></span>
+            </div>
+            <p style="color:var(--muted);font-size:12px;margin-top:8px;letter-spacing:.08em"
+               th:text="${#temporals.format(partita.dataOra, 'dd/MM/yyyy HH:mm')} + '  ·  ' + ${partita.luogo}"></p>
         </div>
-        <p class="text-center text-muted"
-           th:text="${#temporals.format(partita.dataOra, 'dd/MM/yyyy HH:mm')} + ' — ' + ${partita.luogo}"></p>
 
         <form th:action="@{/partite/{id}/risultato(id=${partita.id})}" method="post">
-            <div class="form-row score-row">
-                <div class="form-group text-center">
+            <div class="score-grid">
+                <div class="form-group" style="text-align:center">
                     <label th:text="${partita.squadraHome.nome}"></label>
                     <input type="number" name="goalsHome" min="0" max="99"
                            th:value="${partita.goalsHome}" required class="score-input"/>
                 </div>
-                <div class="score-separator">—</div>
-                <div class="form-group text-center">
+                <div class="score-sep" style="padding-bottom:11px">—</div>
+                <div class="form-group" style="text-align:center">
                     <label th:text="${partita.squadraAway.nome}"></label>
                     <input type="number" name="goalsAway" min="0" max="99"
                            th:value="${partita.goalsAway}" required class="score-input"/>
@@ -32,7 +44,7 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/partite/{id}(id=${partita.id})}" class="btn btn-outline">Annulla</a>
+                <a th:href="@{/partite/{id}(id=${partita.id})}" class="btn btn-ghost">Annulla</a>
                 <button type="submit" class="btn btn-primary">Conferma Risultato</button>
             </div>
         </form>

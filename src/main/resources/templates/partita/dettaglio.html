@@ -5,78 +5,109 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="page-header">
-        <div>
-            <a th:href="@{/tornei/{id}(id=${partita.torneo.id})}" class="btn btn-outline btn-sm">← Torneo</a>
-            <h1>
-                <span th:text="${partita.squadraHome.nome}"></span>
-                vs
-                <span th:text="${partita.squadraAway.nome}"></span>
-            </h1>
-        </div>
-        <div sec:authorize="hasRole('ADMIN')" class="admin-actions">
-            <a th:href="@{/partite/{id}/risultato(id=${partita.id})}"
-               th:if="${partita.stato.name() == 'SCHEDULED'}"
-               class="btn btn-primary">Inserisci Risultato</a>
+<!-- Detail hero -->
+<div class="detail-hero">
+    <svg class="stripe-svg" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,220 500,0 1440,0 1440,220" fill="rgba(43,183,168,.07)"/>
+    </svg>
+    <div class="inner">
+        <nav class="breadcrumb">
+            <a th:href="@{/tornei}">Tornei</a>
+            <span>›</span>
+            <a th:href="@{/tornei/{id}(id=${partita.torneo.id})}" th:text="${partita.torneo.nome}"></a>
+            <span>›</span>
+            <span>Partita</span>
+        </nav>
+        <div class="page-header" style="margin-bottom:0">
+            <div class="page-header-left">
+                <span class="eyebrow" th:text="${#temporals.format(partita.dataOra, 'dd MMMM yyyy')}"></span>
+                <h1 class="page-title" style="font-size:clamp(28px,4vw,44px)">
+                    <span th:text="${partita.squadraHome.nome}"></span>
+                    <span style="color:var(--teal-soft)"> vs </span>
+                    <span th:text="${partita.squadraAway.nome}"></span>
+                </h1>
+            </div>
+            <div sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/partite/{id}/risultato(id=${partita.id})}"
+                   th:if="${partita.stato.name() == 'SCHEDULED'}"
+                   class="btn btn-primary">Inserisci Risultato</a>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Match info card -->
-    <div class="match-card">
-        <div class="match-score" th:if="${partita.stato.name() == 'PLAYED'}">
-            <span class="team-name" th:text="${partita.squadraHome.nome}"></span>
-            <span class="score" th:text="${partita.goalsHome} + ' - ' + ${partita.goalsAway}"></span>
-            <span class="team-name" th:text="${partita.squadraAway.nome}"></span>
-        </div>
-        <div class="match-scheduled" th:unless="${partita.stato.name() == 'PLAYED'}">
-            <span class="team-name" th:text="${partita.squadraHome.nome}"></span>
-            <span class="vs">VS</span>
-            <span class="team-name" th:text="${partita.squadraAway.nome}"></span>
-        </div>
+<div class="page-wrapper">
 
-        <div class="match-meta">
+    <!-- Match hero card -->
+    <div class="match-hero">
+        <!-- Result view -->
+        <div th:if="${partita.stato.name() == 'PLAYED'}">
+            <div class="match-vs-row">
+                <span class="match-team" th:text="${partita.squadraHome.nome}"></span>
+                <span class="match-score-display"
+                      th:text="${partita.goalsHome} + ' — ' + ${partita.goalsAway}"></span>
+                <span class="match-team" th:text="${partita.squadraAway.nome}"></span>
+            </div>
+        </div>
+        <!-- Scheduled view -->
+        <div th:unless="${partita.stato.name() == 'PLAYED'}">
+            <div class="match-vs-row">
+                <span class="match-team" th:text="${partita.squadraHome.nome}"></span>
+                <span class="match-vs-label">VS</span>
+                <span class="match-team" th:text="${partita.squadraAway.nome}"></span>
+            </div>
+        </div>
+        <!-- Meta row -->
+        <div class="match-meta-row">
             <span>📅 <span th:text="${#temporals.format(partita.dataOra, 'dd/MM/yyyy HH:mm')}"></span></span>
             <span>📍 <span th:text="${partita.luogo}"></span></span>
-            <span>👤 Arbitro: <span th:text="${partita.arbitro.nome} + ' ' + ${partita.arbitro.cognome}"></span></span>
-            <span class="badge" th:text="${partita.stato}"></span>
+            <span>👤 <span th:text="${partita.arbitro.nome} + ' ' + ${partita.arbitro.cognome}"></span></span>
+            <span class="badge"
+                  th:classappend="${partita.stato.name() == 'PLAYED'} ? ' badge-green' : (${partita.stato.name() == 'SCHEDULED'} ? ' badge-teal' : ' badge-red')"
+                  th:text="${partita.stato}"></span>
         </div>
     </div>
 
     <!-- Commenti -->
     <div class="section">
-        <h2>Commenti</h2>
-
-        <div th:if="${#lists.isEmpty(commenti)}" class="empty-state">
-            <p>Nessun commento ancora.</p>
+        <div class="section-header">
+            <h2 class="section-title">Commenti</h2>
+            <span class="badge badge-gray" th:text="${#lists.size(commenti)} + ' commenti'"></span>
         </div>
 
-        <div class="commento-list">
-            <div class="commento" th:each="c : ${commenti}">
-                <div class="commento-header">
-                    <strong th:text="${c.utente.username}"></strong>
-                    <span class="commento-date" th:text="${#temporals.format(c.dataCreazione, 'dd/MM/yyyy HH:mm')}"></span>
+        <div th:if="${#lists.isEmpty(commenti)}" class="empty-state" style="padding:32px 0">
+            <div class="empty-icon">💬</div>
+            <p>Nessun commento ancora. Sii il primo!</p>
+        </div>
+
+        <div class="comment-list" th:unless="${#lists.isEmpty(commenti)}">
+            <div class="comment-card" th:each="c : ${commenti}">
+                <div class="comment-header">
+                    <span class="comment-author" th:text="${c.utente.username}"></span>
+                    <span class="comment-date"
+                          th:text="${#temporals.format(c.dataCreazione, 'dd/MM/yyyy HH:mm')}"></span>
                     <a th:href="@{/commenti/{id}/modifica(id=${c.id})}"
                        th:if="${utenteCorrente != null and utenteCorrente == c.utente.username}"
-                       class="btn btn-sm">Modifica</a>
+                       class="btn btn-ghost btn-sm" style="margin-left:auto">Modifica</a>
                 </div>
-                <p class="commento-testo" th:text="${c.testo}"></p>
+                <p class="comment-text" th:text="${c.testo}"></p>
             </div>
         </div>
 
-        <!-- Form nuovo commento (solo utenti autenticati) -->
-        <div sec:authorize="isAuthenticated()" class="commento-form">
+        <!-- Aggiunge commento (utenti autenticati) -->
+        <div sec:authorize="isAuthenticated()" class="comment-form-box">
             <h3>Aggiungi un commento</h3>
             <form th:action="@{/commenti/aggiungi}" method="post">
                 <input type="hidden" name="partitaId" th:value="${partita.id}"/>
                 <div class="form-group">
-                    <textarea name="testo" rows="3" required placeholder="Scrivi il tuo commento..."></textarea>
+                    <textarea name="testo" rows="3" required
+                              placeholder="Scrivi la tua opinione sulla partita..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Invia</button>
+                <button type="submit" class="btn btn-primary">Invia Commento</button>
             </form>
         </div>
 
-        <div sec:authorize="!isAuthenticated()" class="alert alert-info">
+        <div sec:authorize="!isAuthenticated()" class="alert alert-info" style="margin-top:20px">
             <a th:href="@{/login}">Accedi</a> per lasciare un commento.
         </div>
     </div>

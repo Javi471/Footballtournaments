@@ -4,18 +4,27 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
+<div class="page-wrapper" style="max-width:600px">
     <div class="form-card">
+        <nav class="breadcrumb" style="margin-bottom:20px">
+            <a th:href="@{/tornei}">Tornei</a>
+            <span>›</span>
+            <a th:href="@{/partite/{id}(id=${commento.partita.id})}">Partita</a>
+            <span>›</span>
+            <span>Modifica Commento</span>
+        </nav>
         <h2>Modifica Commento</h2>
 
         <form th:action="@{/commenti/{id}/modifica(id=${commento.id})}" method="post">
             <div class="form-group">
-                <label>Commento</label>
-                <textarea name="testo" rows="5" required th:text="${commento.testo}"></textarea>
+                <label>Il tuo commento</label>
+                <textarea name="testo" rows="5" required
+                          th:text="${commento.testo}"
+                          placeholder="Scrivi il tuo commento..."></textarea>
             </div>
             <div class="form-actions">
-                <a th:href="@{/partite/{id}(id=${commento.partita.id})}" class="btn btn-outline">Annulla</a>
-                <button type="submit" class="btn btn-primary">Aggiorna</button>
+                <a th:href="@{/partite/{id}(id=${commento.partita.id})}" class="btn btn-ghost">Annulla</a>
+                <button type="submit" class="btn btn-primary">Aggiorna Commento</button>
             </div>
         </form>
     </div>

@@ -4,8 +4,16 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="form-card">
+<div class="page-wrapper">
+    <div class="form-card" style="max-width:760px">
+        <nav class="breadcrumb" style="margin-bottom:20px">
+            <a th:href="@{/squadre}">Squadre</a>
+            <span>›</span>
+            <a th:href="${giocatore.squadra != null} ? @{/squadre/{id}(id=${giocatore.squadra.id})} : '#'"
+               th:text="${giocatore.squadra != null} ? ${giocatore.squadra.nome} : 'Squadra'"></a>
+            <span>›</span>
+            <span th:text="${giocatore.id != null} ? 'Modifica Giocatore' : 'Nuovo Giocatore'"></span>
+        </nav>
         <h2 th:text="${giocatore.id != null} ? 'Modifica Giocatore' : 'Nuovo Giocatore'"></h2>
 
         <form th:action="${giocatore.id != null} ? @{/giocatori/{id}/modifica(id=${giocatore.id})} : @{/giocatori/nuovo}"
@@ -14,13 +22,13 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Nome *</label>
-                    <input type="text" th:field="*{nome}" required/>
-                    <span class="error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                    <input type="text" th:field="*{nome}" required placeholder="Es. Marco"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
                 </div>
                 <div class="form-group">
                     <label>Cognome *</label>
-                    <input type="text" th:field="*{cognome}" required/>
-                    <span class="error" th:if="${#fields.hasErrors('cognome')}" th:errors="*{cognome}"></span>
+                    <input type="text" th:field="*{cognome}" required placeholder="Es. Rossi"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('cognome')}" th:errors="*{cognome}"></span>
                 </div>
             </div>
 
@@ -28,33 +36,34 @@
                 <div class="form-group">
                     <label>Data di Nascita *</label>
                     <input type="date" th:field="*{dataNascita}" required/>
-                    <span class="error" th:if="${#fields.hasErrors('dataNascita')}" th:errors="*{dataNascita}"></span>
+                    <span class="error-msg" th:if="${#fields.hasErrors('dataNascita')}"
+                          th:errors="*{dataNascita}"></span>
                 </div>
                 <div class="form-group">
                     <label>Altezza (cm)</label>
-                    <input type="number" th:field="*{altezza}" min="140" max="220"/>
+                    <input type="number" th:field="*{altezza}" min="140" max="220" placeholder="Es. 178"/>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Ruolo *</label>
                 <select th:field="*{ruolo}" required>
-                    <option value="">-- Seleziona --</option>
+                    <option value="">— Seleziona ruolo —</option>
                     <option value="Portiere">Portiere</option>
                     <option value="Difensore">Difensore</option>
                     <option value="Centrocampista">Centrocampista</option>
                     <option value="Attaccante">Attaccante</option>
                 </select>
-                <span class="error" th:if="${#fields.hasErrors('ruolo')}" th:errors="*{ruolo}"></span>
+                <span class="error-msg" th:if="${#fields.hasErrors('ruolo')}" th:errors="*{ruolo}"></span>
             </div>
 
             <div class="form-group">
                 <label>Squadra *</label>
                 <select name="squadraId" required>
-                    <option value="">-- Seleziona --</option>
+                    <option value="">— Seleziona squadra —</option>
                     <option th:each="s : ${squadre}"
                             th:value="${s.id}"
-                            th:text="${s.nome}"
+                            th:text="${s.nome} + ' (' + ${s.citta} + ')'"
                             th:selected="${giocatore.squadra != null and giocatore.squadra.id == s.id}">
                     </option>
                 </select>
@@ -62,8 +71,8 @@
 
             <div class="form-actions">
                 <a th:href="${giocatore.squadra != null} ? @{/squadre/{id}(id=${giocatore.squadra.id})} : @{/squadre}"
-                   class="btn btn-outline">Annulla</a>
-                <button type="submit" class="btn btn-primary">Salva</button>
+                   class="btn btn-ghost">Annulla</a>
+                <button type="submit" class="btn btn-primary">Salva Giocatore</button>
             </div>
         </form>
     </div>

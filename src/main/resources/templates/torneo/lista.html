@@ -5,31 +5,48 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Tornei di Calcio</h1>
-        <a th:href="@{/tornei/nuovo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">+ Nuovo Torneo</a>
+<!-- Hero stripe -->
+<div class="hero-stripe">
+    <svg class="stripe-svg" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,200 400,0 1440,0 1440,200" fill="rgba(43,183,168,.06)"/>
+        <polygon points="0,200 700,60 1440,120 1440,200" fill="rgba(43,183,168,.03)"/>
+    </svg>
+    <div class="hero-inner">
+        <div class="page-header">
+            <div class="page-header-left">
+                <span class="eyebrow">⚽ Stagione 2026</span>
+                <h1 class="page-title">Tornei di Calcio</h1>
+                <p class="page-subtitle">Tutti i tornei amatoriali in corso</p>
+            </div>
+            <a th:href="@{/tornei/nuovo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">
+                + Nuovo Torneo
+            </a>
+        </div>
     </div>
+</div>
 
+<div class="page-wrapper">
     <div th:if="${#lists.isEmpty(tornei)}" class="empty-state">
-        <p>Nessun torneo disponibile.</p>
+        <div class="empty-icon">🏆</div>
+        <p>Nessun torneo disponibile al momento.</p>
     </div>
 
     <div class="card-grid">
         <div class="card" th:each="torneo : ${tornei}">
+            <div class="card-accent-bar"></div>
             <div class="card-body">
+                <div class="card-meta" th:text="'Anno ' + ${torneo.anno}"></div>
                 <h3 class="card-title" th:text="${torneo.nome}"></h3>
-                <p class="card-subtitle" th:text="'Anno: ' + ${torneo.anno}"></p>
-                <p th:text="${torneo.descrizione}" class="card-text"></p>
+                <p class="card-text" th:text="${torneo.descrizione}"></p>
             </div>
             <div class="card-footer">
-                <a th:href="@{/tornei/{id}(id=${torneo.id})}" class="btn btn-secondary">Dettagli</a>
-                <a th:href="@{/tornei/{id}/classifica(id=${torneo.id})}" class="btn btn-outline">Classifica</a>
-                <div sec:authorize="hasRole('ADMIN')" class="admin-actions">
-                    <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-sm">Modifica</a>
+                <a th:href="@{/tornei/{id}(id=${torneo.id})}" class="btn btn-ghost btn-sm">Dettagli</a>
+                <a th:href="@{/tornei/{id}/classifica(id=${torneo.id})}" class="btn btn-primary btn-sm">Classifica</a>
+                <div sec:authorize="hasRole('ADMIN')" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
+                    <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Modifica</a>
                     <form th:action="@{/tornei/{id}/elimina(id=${torneo.id})}" method="post" style="display:inline"
                           onsubmit="return confirm('Eliminare questo torneo?')">
-                        <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                     </form>
                 </div>
             </div>

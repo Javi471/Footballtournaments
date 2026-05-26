@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Classifica ' + ${torneo.nome})}"></head>
+<head th:replace="~{fragments/layout :: head('Classifica')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="page-header">
-        <div>
-            <a th:href="@{/tornei/{id}(id=${torneo.id})}" class="btn btn-outline btn-sm">← Torneo</a>
-            <h1>Classifica — <span th:text="${torneo.nome}"></span></h1>
-        </div>
+<div class="page-wrapper" style="max-width:600px;text-align:center;padding-top:80px">
+    <div style="font-size:48px;margin-bottom:16px">🏆</div>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;margin-bottom:8px">
+        Caricamento Classifica...
+    </h2>
+    <p style="color:var(--muted);margin-bottom:24px">
+        Redirect verso il frontend React in corso...
+    </p>
+    <div class="alert alert-info">
+        La classifica è gestita da React. Assicurati che il frontend sia in esecuzione:
+        <code style="display:block;margin-top:8px;color:var(--teal-soft)">cd frontend &amp;&amp; npm run dev</code>
     </div>
-
-    <div class="alert alert-info" style="margin-bottom:1.5rem;">
-        ⚽ La classifica è gestita da React.
-        Assicurati che il frontend sia in esecuzione su
-        <strong>http://localhost:5173</strong>
-        (<code>cd frontend &amp;&amp; npm run dev</code>)
-    </div>
-
-    <!-- Redirige a la app React pasando el torneoId en la URL -->
-    <script th:inline="javascript">
-        const torneoId = /*[[${torneo.id}]]*/ null;
-        window.location.href = `http://localhost:5173/classifica/${torneoId}`;
-    </script>
-
     <noscript>
-        <p class="alert alert-error">
-            JavaScript es necesario. Accede directamente a
+        <div class="alert alert-error" style="margin-top:16px">
+            JavaScript è necessario. Accedi direttamente a
             <a th:href="'http://localhost:5173/classifica/' + ${torneo.id}">
                 http://localhost:5173/classifica/<span th:text="${torneo.id}"></span>
             </a>
-        </p>
+        </div>
     </noscript>
 </div>
+
+<script th:inline="javascript">
+    const torneoId = /*[[${torneo.id}]]*/ null;
+    window.location.href = `http://localhost:5173/classifica/${torneoId}`;
+</script>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

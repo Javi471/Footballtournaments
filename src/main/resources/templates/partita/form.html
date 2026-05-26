@@ -4,8 +4,13 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="form-card">
+<div class="page-wrapper">
+    <div class="form-card" style="max-width:760px">
+        <nav class="breadcrumb" style="margin-bottom:20px">
+            <a th:href="@{/tornei}">Tornei</a>
+            <span>›</span>
+            <span>Registra Partita</span>
+        </nav>
         <h2>Registra Partita</h2>
 
         <form th:action="@{/partite/nuova}" method="post">
@@ -13,8 +18,9 @@
             <div class="form-group">
                 <label>Torneo *</label>
                 <select name="torneoId" required>
-                    <option value="">-- Seleziona Torneo --</option>
-                    <option th:each="t : ${tornei}" th:value="${t.id}" th:text="${t.nome} + ' (' + ${t.anno} + ')'"></option>
+                    <option value="">— Seleziona Torneo —</option>
+                    <option th:each="t : ${tornei}" th:value="${t.id}"
+                            th:text="${t.nome} + ' (' + ${t.anno} + ')'"></option>
                 </select>
             </div>
 
@@ -22,14 +28,14 @@
                 <div class="form-group">
                     <label>Squadra Casa *</label>
                     <select name="squadraHomeId" required>
-                        <option value="">-- Seleziona --</option>
+                        <option value="">— Seleziona —</option>
                         <option th:each="s : ${squadre}" th:value="${s.id}" th:text="${s.nome}"></option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Squadra Ospite *</label>
                     <select name="squadraAwayId" required>
-                        <option value="">-- Seleziona --</option>
+                        <option value="">— Seleziona —</option>
                         <option th:each="s : ${squadre}" th:value="${s.id}" th:text="${s.nome}"></option>
                     </select>
                 </div>
@@ -38,9 +44,10 @@
             <div class="form-group">
                 <label>Arbitro *</label>
                 <select name="arbitroId" required>
-                    <option value="">-- Seleziona Arbitro --</option>
+                    <option value="">— Seleziona Arbitro —</option>
                     <option th:each="a : ${arbitri}" th:value="${a.id}"
-                            th:text="${a.nome} + ' ' + ${a.cognome} + ' (' + ${a.codiceArbitrale} + ')'"></option>
+                            th:text="${a.nome} + ' ' + ${a.cognome} + ' [' + ${a.codiceArbitrale} + ']'">
+                    </option>
                 </select>
             </div>
 
@@ -56,8 +63,8 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/tornei}" class="btn btn-outline">Annulla</a>
-                <button type="submit" class="btn btn-primary">Registra</button>
+                <a th:href="@{/tornei}" class="btn btn-ghost">Annulla</a>
+                <button type="submit" class="btn btn-primary">Registra Partita</button>
             </div>
         </form>
     </div>

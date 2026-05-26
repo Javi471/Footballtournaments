@@ -5,82 +5,110 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
-    <div class="page-header">
-        <div>
-            <a th:href="@{/tornei}" class="btn btn-outline btn-sm">← Tornei</a>
-            <h1 th:text="${torneo.nome}"></h1>
-            <span class="badge" th:text="${torneo.anno}"></span>
-        </div>
-        <div sec:authorize="hasRole('ADMIN')" class="admin-actions">
-            <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-secondary">Modifica</a>
-            <a th:href="@{/partite/nuova}" class="btn btn-primary">+ Partita</a>
+<!-- Detail hero -->
+<div class="detail-hero">
+    <svg class="stripe-svg" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,220 500,0 1440,0 1440,220" fill="rgba(43,183,168,.07)"/>
+        <polygon points="0,220 900,80 1440,150 1440,220" fill="rgba(43,183,168,.04)"/>
+    </svg>
+    <div class="inner">
+        <nav class="breadcrumb">
+            <a th:href="@{/tornei}">Tornei</a>
+            <span>›</span>
+            <span th:text="${torneo.nome}"></span>
+        </nav>
+        <div class="page-header" style="margin-bottom:0">
+            <div class="page-header-left">
+                <span class="eyebrow" th:text="'Stagione ' + ${torneo.anno}"></span>
+                <h1 class="page-title" th:text="${torneo.nome}"></h1>
+                <p style="color:var(--muted);font-size:14px;margin-top:8px;max-width:600px"
+                   th:if="${torneo.descrizione}" th:text="${torneo.descrizione}"></p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"
+                 sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Modifica</a>
+                <a th:href="@{/partite/nuova}" class="btn btn-primary btn-sm">+ Partita</a>
+            </div>
         </div>
     </div>
+</div>
 
-    <p class="description" th:text="${torneo.descrizione}"></p>
+<div class="page-wrapper">
 
+    <!-- Squadre partecipanti -->
     <div class="section">
         <div class="section-header">
-            <h2>Squadre Partecipanti</h2>
+            <h2 class="section-title">Squadre Partecipanti</h2>
+            <span class="badge badge-teal" th:text="${#lists.size(torneo.squadre)} + ' squadre'"></span>
         </div>
-        <div th:if="${#lists.isEmpty(torneo.squadre)}" class="empty-state">
-            <p>Nessuna squadra registrata.</p>
+        <div th:if="${#lists.isEmpty(torneo.squadre)}" class="empty-state" style="padding:32px 0">
+            <p>Nessuna squadra registrata in questo torneo.</p>
         </div>
-        <div class="tag-list">
+        <div class="tag-list" th:unless="${#lists.isEmpty(torneo.squadre)}">
             <a class="tag" th:each="s : ${torneo.squadre}"
                th:href="@{/squadre/{id}(id=${s.id})}"
                th:text="${s.nome}"></a>
         </div>
     </div>
 
+    <!-- Calendario partite -->
     <div class="section">
         <div class="section-header">
-            <h2>Calendario Partite</h2>
-            <a th:href="@{/tornei/{id}/classifica(id=${torneo.id})}" class="btn btn-outline">Classifica</a>
+            <h2 class="section-title">Calendario Partite</h2>
+            <a th:href="@{/tornei/{id}/classifica(id=${torneo.id})}" class="btn btn-primary btn-sm">
+                🏆 Classifica
+            </a>
         </div>
-        <div th:if="${#lists.isEmpty(partite)}" class="empty-state">
+        <div th:if="${#lists.isEmpty(partite)}" class="empty-state" style="padding:40px 0">
+            <div class="empty-icon">📅</div>
             <p>Nessuna partita programmata.</p>
         </div>
-        <table class="table" th:unless="${#lists.isEmpty(partite)}">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Casa</th>
-                    <th>Ospite</th>
-                    <th>Luogo</th>
-                    <th>Risultato</th>
-                    <th>Stato</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="p : ${partite}">
-                    <td th:text="${#temporals.format(p.dataOra, 'dd/MM/yyyy HH:mm')}"></td>
-                    <td th:text="${p.squadraHome.nome}"></td>
-                    <td th:text="${p.squadraAway.nome}"></td>
-                    <td th:text="${p.luogo}"></td>
-                    <td>
-                        <span th:if="${p.stato.name() == 'PLAYED'}"
-                              th:text="${p.goalsHome} + ' - ' + ${p.goalsAway}"></span>
-                        <span th:unless="${p.stato.name() == 'PLAYED'}">-</span>
-                    </td>
-                    <td><span class="badge" th:text="${p.stato}"></span></td>
-                    <td>
-                        <a th:href="@{/partite/{id}(id=${p.id})}" class="btn btn-sm">Dettagli</a>
-                        <span sec:authorize="hasRole('ADMIN')">
-                            <a th:href="@{/partite/{id}/risultato(id=${p.id})}"
-                               th:if="${p.stato.name() == 'SCHEDULED'}"
-                               class="btn btn-sm btn-secondary">Risultato</a>
-                            <form th:action="@{/partite/{id}/elimina(id=${p.id})}" method="post" style="display:inline"
-                                  onsubmit="return confirm('Eliminare questa partita?')">
-                                <button type="submit" class="btn btn-sm btn-danger">✕</button>
-                            </form>
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(partite)}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Casa</th>
+                        <th>Ospite</th>
+                        <th>Luogo</th>
+                        <th class="center">Risultato</th>
+                        <th class="center">Stato</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${partite}">
+                        <td th:text="${#temporals.format(p.dataOra, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${p.squadraHome.nome}"></td>
+                        <td th:text="${p.squadraAway.nome}"></td>
+                        <td th:text="${p.luogo}"></td>
+                        <td class="center">
+                            <span th:if="${p.stato.name() == 'PLAYED'}"
+                                  style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#3FD1C0;letter-spacing:.04em"
+                                  th:text="${p.goalsHome} + ' — ' + ${p.goalsAway}"></span>
+                            <span th:unless="${p.stato.name() == 'PLAYED'}" style="color:var(--muted)">—</span>
+                        </td>
+                        <td class="center">
+                            <span class="badge"
+                                  th:classappend="${p.stato.name() == 'PLAYED'} ? ' badge-green' : (${p.stato.name() == 'SCHEDULED'} ? ' badge-teal' : ' badge-red')"
+                                  th:text="${p.stato}"></span>
+                        </td>
+                        <td style="white-space:nowrap">
+                            <a th:href="@{/partite/{id}(id=${p.id})}" class="btn btn-ghost btn-sm">Dettagli</a>
+                            <span sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/partite/{id}/risultato(id=${p.id})}"
+                                   th:if="${p.stato.name() == 'SCHEDULED'}"
+                                   class="btn btn-primary btn-sm">Risultato</a>
+                                <form th:action="@{/partite/{id}/elimina(id=${p.id})}" method="post"
+                                      style="display:inline" onsubmit="return confirm('Eliminare questa partita?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">✕</button>
+                                </form>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

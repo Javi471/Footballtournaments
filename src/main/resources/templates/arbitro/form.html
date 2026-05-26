@@ -4,8 +4,13 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="container">
+<div class="page-wrapper">
     <div class="form-card">
+        <nav class="breadcrumb" style="margin-bottom:20px">
+            <a th:href="@{/arbitri}">Arbitri</a>
+            <span>›</span>
+            <span th:text="${arbitro.id != null} ? 'Modifica Arbitro' : 'Nuovo Arbitro'"></span>
+        </nav>
         <h2 th:text="${arbitro.id != null} ? 'Modifica Arbitro' : 'Nuovo Arbitro'"></h2>
 
         <form th:action="${arbitro.id != null} ? @{/arbitri/{id}/modifica(id=${arbitro.id})} : @{/arbitri/nuovo}"
@@ -14,25 +19,26 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Nome *</label>
-                    <input type="text" th:field="*{nome}" required/>
-                    <span class="error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                    <input type="text" th:field="*{nome}" required placeholder="Es. Luca"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
                 </div>
                 <div class="form-group">
                     <label>Cognome *</label>
-                    <input type="text" th:field="*{cognome}" required/>
-                    <span class="error" th:if="${#fields.hasErrors('cognome')}" th:errors="*{cognome}"></span>
+                    <input type="text" th:field="*{cognome}" required placeholder="Es. Bianchi"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('cognome')}" th:errors="*{cognome}"></span>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Codice Arbitrale *</label>
                 <input type="text" th:field="*{codiceArbitrale}" required placeholder="Es. ARB-001"/>
-                <span class="error" th:if="${#fields.hasErrors('codiceArbitrale')}" th:errors="*{codiceArbitrale}"></span>
+                <span class="error-msg" th:if="${#fields.hasErrors('codiceArbitrale')}"
+                      th:errors="*{codiceArbitrale}"></span>
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/arbitri}" class="btn btn-outline">Annulla</a>
-                <button type="submit" class="btn btn-primary">Salva</button>
+                <a th:href="@{/arbitri}" class="btn btn-ghost">Annulla</a>
+                <button type="submit" class="btn btn-primary">Salva Arbitro</button>
             </div>
         </form>
     </div>

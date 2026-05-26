@@ -24,12 +24,8 @@ export default function App() {
   }, [torneoId])
 
   if (!torneoId) {
-    return (
-      <div style={styles.container}>
-        <p style={styles.error}>⚠ No se ha indicado ningún torneo en la URL.</p>
-        <p style={styles.hint}>Accede desde la app principal en <a href="http://localhost:8080/tornei">localhost:8080/tornei</a></p>
-      </div>
-    )
+    window.location.href = 'http://localhost:8080/tornei'
+    return null
   }
 
   return (
