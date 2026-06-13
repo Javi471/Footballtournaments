@@ -7,6 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
+        <!-- Actualizado de 3.5.0 a 3.5.14 (ultima version de parche disponible) -->
         <version>3.5.14</version>
         <relativePath/>
     </parent>
@@ -50,7 +51,8 @@
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
 
-        <!-- OAuth2 Client (login con GitHub/Google) -->
+        <!-- OAuth2 Client — anadido por nosotros para el login con GitHub -->
+        <!-- sin esta dependencia Spring no sabe que es OAuth2 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
