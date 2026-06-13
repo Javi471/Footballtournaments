@@ -29,5 +29,24 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+
+  // Configuracion del build (compilacion) para produccion
+  // Convierte classifica.jsx en classifica.js que puede cargar el navegador
+  build: {
+    lib: {
+      // Archivo de entrada: classifica.jsx (el que tiene el componente + el mount)
+      entry: 'src/classifica.jsx',
+      // Nombre global de la libreria en el navegador (necesario para formato iife)
+      name: 'Classifica',
+      // formato iife = el archivo se ejecuta solo al cargarse, sin necesitar import/require
+      formats: ['iife'],
+      // El archivo de salida se llamara siempre classifica.js
+      fileName: () => 'classifica.js'
+    },
+    // Carpeta de salida: va directamente a static de Spring Boot para que lo sirva
+    outDir: '../src/main/resources/static/react',
+    // No borra otros archivos que haya en esa carpeta al compilar
+    emptyOutDir: false,
   }
 })

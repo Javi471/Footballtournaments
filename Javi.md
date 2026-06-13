@@ -221,6 +221,40 @@ Implementación del bonus de autenticación OAuth2 con GitHub:
 
 ---
 
+## ✅ Paso 16 — Integración real de React en la página de clasificación
+**Fecha:** 14/06/2026
+
+Hasta ahora React existía pero no estaba conectado: la tabla la dibujaba Thymeleaf directamente.
+Se ha completado la integración para que sea React quien dibuje la tabla:
+
+**Archivos modificados:**
+- `frontend/vite.config.js` → añadida sección `build` para compilar `classifica.jsx` como librería IIFE
+  - Entrada: `src/classifica.jsx`
+  - Salida: `src/main/resources/static/react/classifica.js`
+  - Formato `iife`: el archivo se ejecuta solo al cargarse, sin necesitar módulos
+- `torneo/classifica.html` → eliminada la tabla Thymeleaf; sustituida por:
+  - `<div id="classifica-root" data-torneo-id="...">` (donde React monta la tabla)
+  - `<script src="/react/classifica.js">` (el bundle compilado de React)
+
+**Archivo nuevo generado:**
+- `src/main/resources/static/react/classifica.js` → bundle compilado con Vite (React + tabla incluidos)
+
+**Cómo funciona ahora:**
+1. Usuario abre `/tornei/{id}/classifica`
+2. Spring Boot devuelve `classifica.html` (Thymeleaf) con el div vacío y el id del torneo
+3. El navegador carga y ejecuta `classifica.js`
+4. React lee el `data-torneo-id` del div y llama a `/api/tornei/{id}/classifica`
+5. Spring Boot responde con JSON (puntos, victorias, goles...)
+6. React dibuja la tabla dentro del div
+
+**Comando para recompilar React si se modifica classifica.jsx:**
+```
+cd frontend
+npm run build
+```
+
+---
+
 ## 📋 Pendiente
 - [ ] Añadir más datos de prueba (más torneos, equipos, partidos)
 - [ ] Filtros de búsqueda para jugadores y partidos

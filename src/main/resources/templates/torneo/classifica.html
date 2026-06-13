@@ -33,115 +33,22 @@
 
 <div class="page-wrapper">
 
-    <!-- ── Standings table ──────────────────────────────────────────── -->
+    <!-- ── Standings table (React) ──────────────────────────────────── -->
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">League Table</h2>
-            <span class="badge badge-teal"
-                  th:text="${#lists.size(classifica)} + ' teams'"></span>
         </div>
 
-        <div th:if="${#lists.isEmpty(classifica)}" class="empty-state">
-            <div class="empty-icon">🏆</div>
-            <p>No teams in this tournament yet.</p>
-        </div>
-
-        <div class="table-wrap" th:unless="${#lists.isEmpty(classifica)}">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class="center" style="width:42px">#</th>
-                        <th>Team</th>
-                        <th class="center">MP</th>
-                        <th class="center">W</th>
-                        <th class="center">D</th>
-                        <th class="center">L</th>
-                        <th class="center">GF</th>
-                        <th class="center">GA</th>
-                        <th class="center">GD</th>
-                        <th class="center"
-                            style="font-family:'Bebas Neue',sans-serif;font-size:15px;
-                                   color:var(--teal-soft);letter-spacing:.06em">PTS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="riga, iterStat : ${classifica}"
-                        th:style="${iterStat.index == 0} ? 'background:rgba(43,183,168,.06)' : ''">
-
-                        <!-- Position -->
-                        <td class="center">
-                            <span th:if="${iterStat.index == 0}"
-                                  style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fbbf24">🥇</span>
-                            <span th:if="${iterStat.index == 1}"
-                                  style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#94a3b8">🥈</span>
-                            <span th:if="${iterStat.index == 2}"
-                                  style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#cd7c3a">🥉</span>
-                            <span th:if="${iterStat.index > 2}"
-                                  style="color:var(--muted);font-size:13px"
-                                  th:text="${iterStat.index + 1}"></span>
-                        </td>
-
-                        <!-- Team name -->
-                        <td>
-                            <span style="font-weight:600;color:#fff"
-                                  th:text="${riga['squadra'].nome}"></span>
-                            <span style="font-size:11px;color:var(--muted);margin-left:6px"
-                                  th:text="${riga['squadra'].citta}"></span>
-                        </td>
-
-                        <!-- Matches played -->
-                        <td class="center" th:text="${riga['partiteGiocate']}"></td>
-
-                        <!-- Wins -->
-                        <td class="center">
-                            <span style="color:#4ade80;font-weight:600"
-                                  th:text="${riga['vittorie']}"></span>
-                        </td>
-
-                        <!-- Draws -->
-                        <td class="center" th:text="${riga['pareggi']}"></td>
-
-                        <!-- Losses -->
-                        <td class="center">
-                            <span style="color:#f87171"
-                                  th:text="${riga['sconfitte']}"></span>
-                        </td>
-
-                        <!-- Goals For -->
-                        <td class="center" th:text="${riga['golFatti']}"></td>
-
-                        <!-- Goals Against -->
-                        <td class="center" th:text="${riga['golSubiti']}"></td>
-
-                        <!-- Goal Difference -->
-                        <td class="center">
-                            <span th:with="gd=${riga['golFatti']} - ${riga['golSubiti']}"
-                                  th:style="${gd > 0} ? 'color:#4ade80;font-weight:600' : (${gd < 0} ? 'color:#f87171' : 'color:var(--muted)')"
-                                  th:text="${gd > 0} ? '+' + ${gd} : ${gd}"></span>
-                        </td>
-
-                        <!-- Points -->
-                        <td class="center">
-                            <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;
-                                         color:var(--teal-soft);letter-spacing:.04em"
-                                  th:text="${riga['punti']}"></span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Legend -->
-        <div style="display:flex;gap:20px;margin-top:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 4px">
-            <span><strong style="color:#fff">MP</strong> — Matches Played</span>
-            <span><strong style="color:#4ade80">W</strong> — Wins</span>
-            <span><strong style="color:#fff">D</strong> — Draws</span>
-            <span><strong style="color:#f87171">L</strong> — Losses</span>
-            <span><strong style="color:#fff">GF / GA</strong> — Goals For / Against</span>
-            <span><strong style="color:#fff">GD</strong> — Goal Difference</span>
-            <span><strong style="color:var(--teal-soft)">PTS</strong> — Points</span>
-        </div>
+        <!--
+            React monta la tabla de clasificacion dentro de este div.
+            data-torneo-id lo lee classifica.js para saber que torneo cargar.
+            classifica.js llama a /api/tornei/{id}/classifica y dibuja la tabla.
+        -->
+        <div id="classifica-root" th:attr="data-torneo-id=${torneo.id}"></div>
     </div>
+
+    <!-- Script compilado de classifica.jsx por Vite — genera la tabla con React -->
+    <script th:src="@{/react/classifica.js}"></script>
 
 
 </div>
