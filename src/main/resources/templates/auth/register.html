@@ -4,124 +4,103 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="page-wrapper" style="max-width:480px;margin-top:60px">
+<div class="soccer-anim" aria-hidden="true">
+  <div class="soccer-ball-x">
+    <div class="soccer-ball-y">
+      <svg class="soccer-ball-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sball2" cx="36%" cy="30%" r="66%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="55%" stop-color="#e8e8e8"/>
+            <stop offset="100%" stop-color="#aaaaaa"/>
+          </radialGradient>
+          <clipPath id="sclip2"><circle cx="50" cy="50" r="46"/></clipPath>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="url(#sball2)"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="50,20 63,30 58,46 42,46 37,30"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="74,12 86,25 81,40 66,38 63,22"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="83,52 90,67 78,78 65,71 64,55"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="63,76 67,91 51,97 37,89 39,74"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="37,74 23,89 8,82 8,65 24,59"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="17,50 9,35 22,24 35,31 36,47"/>
+        <polygon clip-path="url(#sclip2)" fill="#111" points="26,10 40,8 48,22 37,31 22,26"/>
+        <ellipse cx="31" cy="26" rx="11" ry="7" fill="rgba(255,255,255,0.6)" transform="rotate(-30 31 26)"/>
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#909090" stroke-width="1.2"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrapper" style="max-width:480px;margin-top:80px;position:relative;z-index:10">
     <div class="form-card">
         <div style="text-align:center;margin-bottom:28px">
             <span class="eyebrow">Join the community</span>
             <h2 style="margin-top:8px">Create Account</h2>
         </div>
-
-        <!-- Server-side error — prominent, impossible to miss -->
         <div th:if="${error}"
              style="background:rgba(232,79,63,.15);border:1.5px solid rgba(232,79,63,.5);
                     border-radius:8px;padding:14px 16px;margin-bottom:24px;
                     display:flex;align-items:flex-start;gap:10px">
             <span style="font-size:18px;flex-shrink:0">⚠️</span>
             <div>
-                <div style="font-weight:700;color:#fca5a5;font-size:13px;margin-bottom:2px">
-                    Registration failed
-                </div>
+                <div style="font-weight:700;color:#fca5a5;font-size:13px;margin-bottom:2px">Registration failed</div>
                 <div style="color:#fca5a5;font-size:13px" th:text="${error}"></div>
             </div>
         </div>
-
         <form th:action="@{/register}" method="post">
-
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" name="username" required minlength="3"
                        placeholder="Choose a username (min. 3 characters)"
                        th:value="${username}"/>
             </div>
-
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" name="email" required
-                       placeholder="your@email.com"
-                       th:value="${email}"/>
+                <input type="email" name="email" required placeholder="your@email.com" th:value="${email}"/>
                 <small>Must be a valid email — no duplicates allowed</small>
             </div>
-
             <div class="form-group">
                 <label>Password</label>
                 <input type="password" name="password" id="passwordInput" required
                        placeholder="Min. 6 chars, 1 uppercase, 1 number"
                        oninput="checkPassword(this.value)"/>
-
-                <!-- Live password checklist -->
                 <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
-                    <div id="ck-length" class="pw-check">
-                        <span class="pw-icon">✗</span>
-                        <span>At least 6 characters</span>
-                    </div>
-                    <div id="ck-upper" class="pw-check">
-                        <span class="pw-icon">✗</span>
-                        <span>At least 1 uppercase letter (A-Z)</span>
-                    </div>
-                    <div id="ck-digit" class="pw-check">
-                        <span class="pw-icon">✗</span>
-                        <span>At least 1 number (0-9)</span>
-                    </div>
+                    <div id="ck-length" class="pw-check"><span class="pw-icon">✗</span><span>At least 6 characters</span></div>
+                    <div id="ck-upper"  class="pw-check"><span class="pw-icon">✗</span><span>At least 1 uppercase letter (A-Z)</span></div>
+                    <div id="ck-digit"  class="pw-check"><span class="pw-icon">✗</span><span>At least 1 number (0-9)</span></div>
                 </div>
             </div>
-
-            <button type="submit" id="submitBtn" disabled
-                    class="btn btn-primary"
-                    style="width:100%;justify-content:center;margin-top:8px;
-                           opacity:.4;cursor:not-allowed;transition:opacity .2s">
+            <button type="submit" id="submitBtn" disabled class="btn btn-primary"
+                    style="width:100%;justify-content:center;margin-top:8px;opacity:.4;cursor:not-allowed;transition:opacity .2s">
                 Create Account
             </button>
         </form>
-        <p class="form-footer">Already have an account? <a th:href="@{/login}">Sign in</a></p>
+        <p class="form-footer">Already have an account? <a th:href="@{/login}">Log in</a></p>
     </div>
 </div>
 
 <style>
-.pw-check {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: var(--muted); transition: color .2s;
-}
-.pw-check.ok { color: #4ade80; }
-.pw-icon {
-    width: 16px; height: 16px; border-radius: 50%;
-    background: rgba(167,176,186,.12); border: 1px solid rgba(167,176,186,.25);
-    display: grid; place-items: center;
-    font-size: 9px; font-weight: 700; flex-shrink: 0;
-    transition: background .2s, border-color .2s, color .2s;
-}
-.pw-check.ok .pw-icon {
-    background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.4); color: #4ade80;
-}
-#submitBtn:not([disabled]) { cursor: pointer; }
+.pw-check{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);transition:color .2s}
+.pw-check.ok{color:#4ade80}
+.pw-icon{width:16px;height:16px;border-radius:50%;background:rgba(167,176,186,.12);border:1px solid rgba(167,176,186,.25);
+         display:grid;place-items:center;font-size:9px;font-weight:700;flex-shrink:0;
+         transition:background .2s,border-color .2s,color .2s}
+.pw-check.ok .pw-icon{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#4ade80}
+#submitBtn:not([disabled]){cursor:pointer}
 </style>
 
 <script>
-function checkPassword(val) {
-    const hasLength = val.length >= 6;
-    const hasUpper  = /[A-Z]/.test(val);
-    const hasDigit  = /[0-9]/.test(val);
-
-    applyCheck('ck-length', hasLength);
-    applyCheck('ck-upper',  hasUpper);
-    applyCheck('ck-digit',  hasDigit);
-
-    const btn = document.getElementById('submitBtn');
-    if (hasLength && hasUpper && hasDigit) {
-        btn.removeAttribute('disabled');
-        btn.style.opacity = '1';
-        btn.style.cursor  = 'pointer';
-    } else {
-        btn.setAttribute('disabled', 'disabled');
-        btn.style.opacity = '0.4';
-        btn.style.cursor  = 'not-allowed';
-    }
+function checkPassword(val){
+  var hL=val.length>=6,hU=/[A-Z]/.test(val),hD=/[0-9]/.test(val);
+  applyCheck('ck-length',hL);applyCheck('ck-upper',hU);applyCheck('ck-digit',hD);
+  var btn=document.getElementById('submitBtn');
+  if(hL&&hU&&hD){btn.removeAttribute('disabled');btn.style.opacity='1';btn.style.cursor='pointer';}
+  else{btn.setAttribute('disabled','disabled');btn.style.opacity='0.4';btn.style.cursor='not-allowed';}
 }
-
-function applyCheck(id, ok) {
-    const el   = document.getElementById(id);
-    const icon = el.querySelector('.pw-icon');
-    el.classList.toggle('ok', ok);
-    icon.textContent = ok ? '✓' : '✗';
+function applyCheck(id,ok){
+  var el=document.getElementById(id);
+  el.classList.toggle('ok',ok);
+  el.querySelector('.pw-icon').textContent=ok?'✓':'✗';
 }
 </script>
 

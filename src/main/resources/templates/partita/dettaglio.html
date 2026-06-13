@@ -11,9 +11,11 @@
     </svg>
     <div class="inner">
         <nav class="breadcrumb">
-            <a th:href="@{/tornei}">Tournaments</a>
+            <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei}">Tournaments</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
-            <a th:href="@{/tornei/{id}(id=${partita.torneo.id})}" th:text="${partita.torneo.nome}"></a>
+            <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei/{id}(id=${partita.torneo.id})}" th:text="${partita.torneo.nome}"></a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei/{id}(id=${partita.torneo.id})}" th:text="${partita.torneo.nome}"></a>
             <span>›</span>
             <span>Match</span>
         </nav>
@@ -27,7 +29,7 @@
                 </h1>
             </div>
             <div sec:authorize="hasRole('ADMIN')">
-                <a th:href="@{/partite/{id}/risultato(id=${partita.id})}"
+                <a th:href="@{/admin/partite/{id}/risultato(id=${partita.id})}"
                    th:if="${partita.stato.name() == 'SCHEDULED'}"
                    class="btn btn-primary">Enter Score</a>
             </div>
@@ -101,7 +103,7 @@
         </div>
 
         <div sec:authorize="!isAuthenticated()" class="alert alert-info" style="margin-top:20px">
-            <a th:href="@{/login}">Sign in</a> to leave a comment.
+            <a th:href="@{/login}">Log in</a> to leave a comment.
         </div>
     </div>
 </div>

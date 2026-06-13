@@ -7,16 +7,16 @@
 <div class="page-wrapper">
     <div class="form-card" style="max-width:760px">
         <nav class="breadcrumb" style="margin-bottom:20px">
-            <a th:href="@{/squadre}">Teams</a>
+            <a th:href="@{/admin/squadre}">Teams</a>
             <span>›</span>
-            <a th:href="${giocatore.squadra != null} ? @{/squadre/{id}(id=${giocatore.squadra.id})} : '#'"
+            <a th:href="${giocatore.squadra != null} ? @{/admin/squadre/{id}(id=${giocatore.squadra.id})} : '#'"
                th:text="${giocatore.squadra != null} ? ${giocatore.squadra.nome} : 'Team'"></a>
             <span>›</span>
             <span th:text="${giocatore.id != null} ? 'Edit Player' : 'New Player'"></span>
         </nav>
         <h2 th:text="${giocatore.id != null} ? 'Edit Player' : 'New Player'"></h2>
 
-        <form th:action="${giocatore.id != null} ? @{/giocatori/{id}/modifica(id=${giocatore.id})} : @{/giocatori/nuovo}"
+        <form th:action="${giocatore.id != null} ? @{/admin/giocatori/{id}/modifica(id=${giocatore.id})} : @{/admin/giocatori/nuovo}"
               th:object="${giocatore}" method="post">
 
             <div class="form-row">
@@ -33,15 +33,31 @@
             </div>
 
             <div class="form-row">
+                <!-- Date of Birth — flatpickr -->
                 <div class="form-group">
                     <label>Date of Birth *</label>
-                    <input type="date" th:field="*{dataNascita}" required/>
+                    <div style="position:relative">
+                        <input type="text" id="dataNascitaPicker" required
+                               placeholder="Select date…"
+                               style="cursor:pointer;padding-right:38px"/>
+                        <!-- hidden real field that Spring binds -->
+                        <input type="hidden" th:field="*{dataNascita}" id="dataNascitaHidden"/>
+                        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                                     font-size:16px;pointer-events:none;color:var(--teal-soft)">📅</span>
+                    </div>
                     <span class="error-msg" th:if="${#fields.hasErrors('dataNascita')}"
                           th:errors="*{dataNascita}"></span>
                 </div>
+
+                <!-- Height — custom stepper -->
                 <div class="form-group">
                     <label>Height (cm)</label>
-                    <input type="number" th:field="*{altezza}" min="140" max="220" placeholder="e.g. 178"/>
+                    <div class="num-stepper">
+                        <button type="button" class="stepper-btn" onclick="stepHeight(-1)">−</button>
+                        <input type="number" th:field="*{altezza}" id="altezzaInput"
+                               min="140" max="220" placeholder="178"/>
+                        <button type="button" class="stepper-btn" onclick="stepHeight(1)">+</button>
+                    </div>
                 </div>
             </div>
 
@@ -70,13 +86,42 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="${giocatore.squadra != null} ? @{/squadre/{id}(id=${giocatore.squadra.id})} : @{/squadre}"
+                <a th:href="${giocatore.squadra != null} ? @{/admin/squadre/{id}(id=${giocatore.squadra.id})} : @{/admin/squadre}"
                    class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save Player</button>
             </div>
         </form>
     </div>
 </div>
+
+<script th:inline="javascript">
+// ── Flatpickr — Date of Birth ──────────────────────────────────────
+const existingDate = /*[[${giocatore.dataNascita}]]*/ null;
+flatpickr("#dataNascitaPicker", {
+    dateFormat: "d/m/Y",          // display format shown to user
+    maxDate: "today",
+    defaultDate: existingDate || null,
+    disableMobile: true,
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+            // write ISO format into the hidden field Spring reads
+            const d = selectedDates[0];
+            const iso = d.getFullYear() + '-'
+                + String(d.getMonth()+1).padStart(2,'0') + '-'
+                + String(d.getDate()).padStart(2,'0');
+            document.getElementById('dataNascitaHidden').value = iso;
+        }
+    }
+});
+
+// ── Height stepper ─────────────────────────────────────────────────
+function stepHeight(delta) {
+    const inp = document.getElementById('altezzaInput');
+    let val = parseInt(inp.value) || 170;
+    val = Math.min(220, Math.max(140, val + delta));
+    inp.value = val;
+}
+</script>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

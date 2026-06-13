@@ -28,6 +28,9 @@ public class Squadra {
     @NotBlank
     private String citta;
 
+    // Ruta de la imagen del equipo (guardada en /images/squadre/)
+    private String imagePath;
+
     @OneToMany(mappedBy = "squadra", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Giocatore> giocatori = new ArrayList<>();
 

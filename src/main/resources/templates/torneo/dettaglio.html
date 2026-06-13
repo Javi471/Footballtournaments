@@ -12,7 +12,8 @@
     </svg>
     <div class="inner">
         <nav class="breadcrumb">
-            <a th:href="@{/tornei}">Tournaments</a>
+            <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei}">Tournaments</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
             <span th:text="${torneo.nome}"></span>
         </nav>
@@ -25,8 +26,8 @@
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"
                  sec:authorize="hasRole('ADMIN')">
-                <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Edit</a>
-                <a th:href="@{/partite/nuova}" class="btn btn-primary btn-sm">+ Match</a>
+                <a th:href="@{/admin/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Edit</a>
+                <a th:href="@{/admin/partite/nuova}" class="btn btn-primary btn-sm">+ Match</a>
             </div>
         </div>
     </div>
@@ -43,60 +44,127 @@
             <p>No teams registered in this tournament.</p>
         </div>
         <div class="tag-list" th:unless="${#lists.isEmpty(torneo.squadre)}">
-            <a class="tag" th:each="s : ${torneo.squadre}"
-               th:href="@{/squadre/{id}(id=${s.id})}"
-               th:text="${s.nome}"></a>
+            <span class="tag" th:each="s : ${torneo.squadre}" th:text="${s.nome}"></span>
         </div>
     </div>
 
+    <!-- ── Standings card ────────────────────────────────────── -->
+    <a class="standings-card" th:href="@{/tornei/{id}/classifica(id=${torneo.id})}">
+        <!-- decorative diagonal stripes left panel -->
+        <div class="sc-stripes">
+            <svg width="100" height="100" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <line x1="-10" y1="110" x2="110" y2="-10" stroke="rgba(63,209,192,.18)" stroke-width="12"/>
+                <line x1="10"  y1="110" x2="130" y2="-10" stroke="rgba(63,209,192,.10)" stroke-width="8"/>
+                <line x1="-30" y1="110" x2="90"  y2="-10" stroke="rgba(63,209,192,.08)" stroke-width="6"/>
+            </svg>
+        </div>
+        <!-- podium medals -->
+        <div class="sc-podium">
+            <div class="sc-pos sc-p2">2</div>
+            <div class="sc-pos sc-p1">1</div>
+            <div class="sc-pos sc-p3">3</div>
+        </div>
+        <!-- text -->
+        <div class="sc-body">
+            <span class="sc-eyebrow">⚡ Live Rankings</span>
+            <span class="sc-title">Full Standings</span>
+            <span class="sc-sub">Points · Wins · Goals · Goal diff</span>
+        </div>
+        <!-- arrow -->
+        <div class="sc-arrow">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </a>
+
+    <!-- ── Results banner ───────────────────────────────────── -->
+    <div class="results-card" th:if="${!#lists.isEmpty(risultati)}">
+        <!-- header row (same visual grammar as standings-card) -->
+        <div class="rc-header">
+            <div class="rc-stripes">
+                <svg width="100" height="100" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line x1="-10" y1="110" x2="110" y2="-10" stroke="rgba(251,191,36,.20)" stroke-width="12"/>
+                    <line x1="10"  y1="110" x2="130" y2="-10" stroke="rgba(251,191,36,.12)" stroke-width="8"/>
+                    <line x1="-30" y1="110" x2="90"  y2="-10" stroke="rgba(251,191,36,.08)" stroke-width="6"/>
+                </svg>
+            </div>
+            <div class="rc-match-bars">
+                <div class="rc-mb rc-mb-w"></div>
+                <div class="rc-mb rc-mb-d"></div>
+                <div class="rc-mb rc-mb-l"></div>
+            </div>
+            <div class="sc-body">
+                <span class="sc-eyebrow" style="color:#fbbf24">🏁 Played Matches</span>
+                <span class="sc-title">Results</span>
+                <span class="sc-sub" th:text="${#lists.size(risultati)} + ' matches played'"></span>
+            </div>
+            <div class="rc-count-chip"
+                 th:text="${#lists.size(risultati)} + ' PLAYED'"></div>
+        </div>
+        <!-- divider -->
+        <div class="rc-divider"></div>
+        <!-- rows -->
+        <table class="rc-table">
+            <tbody>
+                <tr th:each="p : ${risultati}">
+                    <td class="rc-date"
+                        th:text="${#temporals.format(p.dataOra, 'dd/MM/yyyy')}"></td>
+                    <td class="rc-team rc-home" th:text="${p.squadraHome.nome}"></td>
+                    <td class="rc-score"
+                        th:text="${p.goalsHome} + ' — ' + ${p.goalsAway}"></td>
+                    <td class="rc-team rc-away" th:text="${p.squadraAway.nome}"></td>
+                    <td class="rc-action">
+                        <a th:href="@{/partite/{id}(id=${p.id})}" class="rc-link-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor"
+                                      stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ── Upcoming Matches (scheduled) ──────────────────────── -->
     <div class="section">
         <div class="section-header">
-            <h2 class="section-title">Match Schedule</h2>
-            <a th:href="@{/tornei/{id}/classifica(id=${torneo.id})}" class="btn btn-primary btn-sm">
-                🏆 Standings
-            </a>
+            <h2 class="section-title">Upcoming Matches</h2>
+            <span class="badge badge-teal" th:text="${#lists.size(prossimePartite)} + ' matches'"></span>
         </div>
-        <div th:if="${#lists.isEmpty(partite)}" class="empty-state" style="padding:40px 0">
+        <div th:if="${#lists.isEmpty(prossimePartite)}" class="empty-state" style="padding:40px 0">
             <div class="empty-icon">📅</div>
-            <p>No matches scheduled yet.</p>
+            <p>No upcoming matches scheduled.</p>
         </div>
-        <div class="table-wrap" th:unless="${#lists.isEmpty(partite)}">
+        <div class="table-wrap" th:unless="${#lists.isEmpty(prossimePartite)}">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Date &amp; Time</th>
                         <th>Home</th>
                         <th>Away</th>
                         <th>Venue</th>
-                        <th class="center">Score</th>
                         <th class="center">Status</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="p : ${partite}">
+                    <tr th:each="p : ${prossimePartite}">
                         <td th:text="${#temporals.format(p.dataOra, 'dd/MM/yyyy HH:mm')}"></td>
                         <td th:text="${p.squadraHome.nome}"></td>
                         <td th:text="${p.squadraAway.nome}"></td>
                         <td th:text="${p.luogo}"></td>
                         <td class="center">
-                            <span th:if="${p.stato.name() == 'PLAYED'}"
-                                  style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:#3FD1C0;letter-spacing:.04em"
-                                  th:text="${p.goalsHome} + ' — ' + ${p.goalsAway}"></span>
-                            <span th:unless="${p.stato.name() == 'PLAYED'}" style="color:var(--muted)">—</span>
-                        </td>
-                        <td class="center">
-                            <span class="badge"
-                                  th:classappend="${p.stato.name() == 'PLAYED'} ? ' badge-green' : (${p.stato.name() == 'SCHEDULED'} ? ' badge-teal' : ' badge-red')"
-                                  th:text="${p.stato}"></span>
+                            <span class="badge badge-teal">SCHEDULED</span>
                         </td>
                         <td style="white-space:nowrap">
                             <a th:href="@{/partite/{id}(id=${p.id})}" class="btn btn-ghost btn-sm">Details</a>
                             <span sec:authorize="hasRole('ADMIN')">
-                                <a th:href="@{/partite/{id}/risultato(id=${p.id})}"
-                                   th:if="${p.stato.name() == 'SCHEDULED'}"
+                                <a th:href="@{/admin/partite/{id}/risultato(id=${p.id})}"
                                    class="btn btn-primary btn-sm">Score</a>
-                                <form th:action="@{/partite/{id}/elimina(id=${p.id})}" method="post"
+                                <form th:action="@{/admin/partite/{id}/elimina(id=${p.id})}" method="post"
                                       style="display:inline" onsubmit="return confirm('Delete this match?')">
                                     <button type="submit" class="btn btn-danger btn-sm">✕</button>
                                 </form>

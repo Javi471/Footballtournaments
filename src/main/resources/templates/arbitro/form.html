@@ -7,13 +7,13 @@
 <div class="page-wrapper">
     <div class="form-card">
         <nav class="breadcrumb" style="margin-bottom:20px">
-            <a th:href="@{/arbitri}">Referees</a>
+            <a th:href="@{/admin/arbitri}">Referees</a>
             <span>›</span>
             <span th:text="${arbitro.id != null} ? 'Edit Referee' : 'New Referee'"></span>
         </nav>
         <h2 th:text="${arbitro.id != null} ? 'Edit Referee' : 'New Referee'"></h2>
 
-        <form th:action="${arbitro.id != null} ? @{/arbitri/{id}/modifica(id=${arbitro.id})} : @{/arbitri/nuovo}"
+        <form th:action="${arbitro.id != null} ? @{/admin/arbitri/{id}/modifica(id=${arbitro.id})} : @{/admin/arbitri/nuovo}"
               th:object="${arbitro}" method="post">
 
             <div class="form-row">
@@ -37,7 +37,7 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/arbitri}" class="btn btn-ghost">Cancel</a>
+                <a th:href="@{/admin/arbitri}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save Referee</button>
             </div>
         </form>

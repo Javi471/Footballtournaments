@@ -5,54 +5,72 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${title} + ' | Football Tournaments'">Football Tournaments</title>
+    <link rel="icon" id="favicon" type="image/png" th:href="@{/images/logo.jpeg}"/>
+    <script th:inline="javascript">
+    (function(){
+        const img = new Image();
+        img.src = /*[[@{/images/logo.jpeg}]]*/ '/images/logo.jpeg';
+        img.onload = function() {
+            const c = document.createElement('canvas');
+            c.width = c.height = 64;
+            const ctx = c.getContext('2d');
+            ctx.beginPath();
+            ctx.arc(32, 32, 32, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(img, 0, 0, 64, 64);
+            document.getElementById('favicon').href = c.toDataURL('image/png');
+        };
+    })();
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var p = window.location.pathname;
+      document.querySelectorAll('.nav-links a[href]').forEach(function(a) {
+        if (p.startsWith(a.getAttribute('href'))) a.classList.add('active');
+      });
+    });
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
 
 <nav th:fragment="navbar">
     <div class="navbar">
         <a class="logo" th:href="@{/tornei}">
-            <div class="logo-mark">
-                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="10" cy="10" r="7.5" stroke="white" stroke-width="1.4"/>
-                    <polygon points="10,3 12.5,7 10,8.5 7.5,7" fill="white" opacity=".9"/>
-                    <polygon points="10,8.5 14,10 13,14 10,15 7,14 6,10" fill="white" opacity=".45"/>
-                </svg>
-            </div>
+            <img th:src="@{/images/logo.jpeg}" alt="Football Tournaments" class="logo-img"/>
             <div class="logo-text">
                 <span class="lt1">FOOTBALL</span>
                 <span class="lt2">TOURNAMENTS</span>
             </div>
         </a>
         <ul class="nav-links">
-            <li><a th:href="@{/tornei}">Tournaments</a></li>
-            <li><a th:href="@{/squadre}">Teams</a></li>
-            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/arbitri}">Referees</a></li>
-            <li sec:authorize="hasRole('ADMIN')" class="admin-link">
-                <a th:href="@{/tornei/nuovo}">+ Tournament</a>
-            </li>
-            <li sec:authorize="hasRole('ADMIN')" class="admin-link">
-                <a th:href="@{/squadre/nuova}">+ Team</a>
-            </li>
+            <li sec:authorize="!hasRole('ADMIN')"><a th:href="@{/tornei}">Tournaments</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/tornei}">Tournaments</a></li>
+            <li sec:authorize="!hasRole('ADMIN')"><a th:href="@{/squadre}">Teams</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/squadre}">Teams</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/arbitri}">Referees</a></li>
             <li sec:authorize="isAuthenticated()">
-                <form th:action="@{/logout}" method="post" style="display:inline">
-                    <button type="submit" class="btn-link">
-                        Logout (<span sec:authentication="name"></span>)
-                    </button>
-                </form>
+                <a th:href="@{/logout}" class="btn-link">
+                    Logout (<span sec:authentication="name"></span>)
+                </a>
             </li>
-            <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}">Login</a></li>
+            <li sec:authorize="!isAuthenticated()"><a th:href="@{/login(show=true)}">Login</a></li>
             <li sec:authorize="!isAuthenticated()">
                 <a th:href="@{/register}" class="btn btn-primary btn-sm">Sign Up</a>
             </li>
         </ul>
     </div>
+    <div class="admin-mode-bar" sec:authorize="hasRole('ADMIN')">
+        <span>⚙ Admin Mode</span>
+    </div>
 </nav>
 
 <footer th:fragment="footer">
-    <div class="footer">
-        <span class="footer-logo">⚽ FOOTBALL TOURNAMENTS</span>
-        <span>Web Information Systems &copy; 2026</span>
+    <div class="footer" style="justify-content:center;text-align:center">
+        <span>Sistemi Informativi Su Web &copy; 2026</span>
     </div>
 </footer>
 

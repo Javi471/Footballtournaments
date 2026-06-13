@@ -1,5 +1,7 @@
 package com.football.tournaments.controller;
 
+import com.football.tournaments.model.Partita;
+import com.football.tournaments.model.StatoPartita;
 import com.football.tournaments.model.Torneo;
 import com.football.tournaments.service.PartitaService;
 import com.football.tournaments.service.SquadraService;
@@ -13,41 +15,66 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/tornei")
 public class TorneoController {
 
     @Autowired private TorneoService torneoService;
     @Autowired private SquadraService squadraService;
     @Autowired private PartitaService partitaService;
 
-    @GetMapping
+    // ── Public ────────────────────────────────────────────────────────────
+
+    @GetMapping("/tornei")
     public String lista(Model model) {
         model.addAttribute("tornei", torneoService.findAll());
         return "torneo/lista";
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/tornei/{id}")
     public String dettaglio(@PathVariable Long id, Model model) {
         Torneo torneo = torneoService.findByIdWithSquadre(id)
             .orElseThrow(() -> new RuntimeException("Torneo non trovato"));
+        List<Partita> all = partitaService.findByTorneo(torneo);
         model.addAttribute("torneo", torneo);
-        model.addAttribute("partite", partitaService.findByTorneo(torneo));
+        model.addAttribute("risultati",       all.stream().filter(p -> p.getStato() == StatoPartita.PLAYED)   .collect(Collectors.toList()));
+        model.addAttribute("prossimePartite", all.stream().filter(p -> p.getStato() == StatoPartita.SCHEDULED).collect(Collectors.toList()));
         return "torneo/dettaglio";
     }
 
-    @GetMapping("/{id}/classifica")
+    @GetMapping("/tornei/{id}/classifica")
     public String classifica(@PathVariable Long id, Model model) {
         Torneo torneo = torneoService.findByIdWithSquadre(id)
             .orElseThrow(() -> new RuntimeException("Torneo non trovato"));
         model.addAttribute("torneo", torneo);
+        model.addAttribute("classifica", partitaService.calcolaClassifica(torneo));
+        model.addAttribute("partite", partitaService.findByTorneo(torneo));
         return "torneo/classifica";
     }
 
-    // --- Admin ---
+    // ── Admin ─────────────────────────────────────────────────────────────
 
-    @GetMapping("/nuovo")
+    @GetMapping("/admin/tornei")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String listaAdmin(Model model) {
+        model.addAttribute("tornei", torneoService.findAll());
+        return "torneo/lista";
+    }
+
+    @GetMapping("/admin/tornei/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String dettaglioAdmin(@PathVariable Long id, Model model) {
+        Torneo torneo = torneoService.findByIdWithSquadre(id)
+            .orElseThrow(() -> new RuntimeException("Torneo non trovato"));
+        List<Partita> all = partitaService.findByTorneo(torneo);
+        model.addAttribute("torneo", torneo);
+        model.addAttribute("risultati",       all.stream().filter(p -> p.getStato() == StatoPartita.PLAYED)   .collect(Collectors.toList()));
+        model.addAttribute("prossimePartite", all.stream().filter(p -> p.getStato() == StatoPartita.SCHEDULED).collect(Collectors.toList()));
+        return "torneo/dettaglio";
+    }
+
+    @GetMapping("/admin/tornei/nuovo")
     @PreAuthorize("hasRole('ADMIN')")
     public String nuovoForm(Model model) {
         model.addAttribute("torneo", new Torneo());
@@ -55,7 +82,7 @@ public class TorneoController {
         return "torneo/form";
     }
 
-    @PostMapping("/nuovo")
+    @PostMapping("/admin/tornei/nuovo")
     @PreAuthorize("hasRole('ADMIN')")
     public String nuovoSalva(@Valid @ModelAttribute Torneo torneo,
                               BindingResult result,
@@ -69,10 +96,10 @@ public class TorneoController {
         if (squadraIds != null) {
             torneoService.aggiornaSquadre(salvato.getId(), squadraIds);
         }
-        return "redirect:/tornei/" + salvato.getId();
+        return "redirect:/admin/tornei/" + salvato.getId();
     }
 
-    @GetMapping("/{id}/modifica")
+    @GetMapping("/admin/tornei/{id}/modifica")
     @PreAuthorize("hasRole('ADMIN')")
     public String modificaForm(@PathVariable Long id, Model model) {
         Torneo torneo = torneoService.findByIdWithSquadre(id)
@@ -82,7 +109,7 @@ public class TorneoController {
         return "torneo/form";
     }
 
-    @PostMapping("/{id}/modifica")
+    @PostMapping("/admin/tornei/{id}/modifica")
     @PreAuthorize("hasRole('ADMIN')")
     public String modificaSalva(@PathVariable Long id,
                                  @Valid @ModelAttribute Torneo torneo,
@@ -98,13 +125,13 @@ public class TorneoController {
         if (squadraIds != null) {
             torneoService.aggiornaSquadre(id, squadraIds);
         }
-        return "redirect:/tornei/" + id;
+        return "redirect:/admin/tornei/" + id;
     }
 
-    @PostMapping("/{id}/elimina")
+    @PostMapping("/admin/tornei/{id}/elimina")
     @PreAuthorize("hasRole('ADMIN')")
     public String elimina(@PathVariable Long id) {
         torneoService.deleteById(id);
-        return "redirect:/tornei";
+        return "redirect:/admin/tornei";
     }
 }

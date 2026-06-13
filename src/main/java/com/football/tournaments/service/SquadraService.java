@@ -4,6 +4,9 @@ import com.football.tournaments.model.Squadra;
 import com.football.tournaments.model.Torneo;
 import com.football.tournaments.repository.SquadraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,11 @@ public class SquadraService {
     @Transactional(readOnly = true)
     public List<Squadra> findAll() {
         return squadraRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Squadra> findPage(int page, int size) {
+        return squadraRepository.findAll(PageRequest.of(page, size, Sort.by("nome")));
     }
 
     @Transactional(readOnly = true)

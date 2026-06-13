@@ -7,9 +7,9 @@
 <div class="page-wrapper" style="max-width:600px">
     <div class="form-card">
         <nav class="breadcrumb" style="margin-bottom:20px">
-            <a th:href="@{/tornei}">Tournaments</a>
+            <a th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
-            <a th:href="@{/partite/{id}(id=${partita.id})}">Match</a>
+            <a th:href="@{/admin/tornei/{id}(id=${partita.torneo.id})}" th:text="${partita.torneo.nome}"></a>
             <span>›</span>
             <span>Enter Score</span>
         </nav>
@@ -27,7 +27,7 @@
                th:text="${#temporals.format(partita.dataOra, 'dd/MM/yyyy HH:mm')} + '  ·  ' + ${partita.luogo}"></p>
         </div>
 
-        <form th:action="@{/partite/{id}/risultato(id=${partita.id})}" method="post">
+        <form th:action="@{/admin/partite/{id}/risultato(id=${partita.id})}" method="post">
             <div class="score-grid">
                 <div class="form-group" style="text-align:center">
                     <label th:text="${partita.squadraHome.nome}"></label>
@@ -43,7 +43,7 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/partite/{id}(id=${partita.id})}" class="btn btn-ghost">Cancel</a>
+                <a th:href="@{/admin/tornei/{id}(id=${partita.torneo.id})}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Confirm Score</button>
             </div>
         </form>

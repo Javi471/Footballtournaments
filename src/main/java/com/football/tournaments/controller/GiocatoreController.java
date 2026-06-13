@@ -13,7 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/giocatori")
+@RequestMapping("/admin/giocatori")
 @PreAuthorize("hasRole('ADMIN')")
 public class GiocatoreController {
 
@@ -44,7 +44,7 @@ public class GiocatoreController {
             .orElseThrow(() -> new RuntimeException("Squadra non trovata"));
         giocatore.setSquadra(squadra);
         giocatoreService.save(giocatore);
-        return "redirect:/squadre/" + squadraId;
+        return "redirect:/admin/squadre/" + squadraId;
     }
 
     @GetMapping("/{id}/modifica")
@@ -70,7 +70,7 @@ public class GiocatoreController {
             .orElseThrow(() -> new RuntimeException("Squadra non trovata"));
         giocatore.setSquadra(squadra);
         giocatoreService.save(giocatore);
-        return "redirect:/squadre/" + squadraId;
+        return "redirect:/admin/squadre/" + squadraId;
     }
 
     @PostMapping("/{id}/elimina")
@@ -79,6 +79,6 @@ public class GiocatoreController {
             .orElseThrow(() -> new RuntimeException("Giocatore non trovato"));
         Long squadraId = g.getSquadra().getId();
         giocatoreService.deleteById(id);
-        return "redirect:/squadre/" + squadraId;
+        return "redirect:/admin/squadre/" + squadraId;
     }
 }

@@ -146,9 +146,107 @@ Implementato il design system estratto dal file Claude Design (Landing.html):
 
 ---
 
-## 🔲 TODO — Da completare
+## ✅ Step 12 — Analisi sperimentale prestazioni JPA (punto 8.2)
+**Data:** 27/05/2026
 
-- [ ] Analisi sperimentale prestazioni JPA (confronto LAZY vs JOIN FETCH vs EntityGraph)
+### Caso d'uso analizzato
+Caricamento di tutte le **partite di un torneo** con le relative associazioni:
+squadra home (`squadraHome`), squadra away (`squadraAway`) e arbitro (`arbitro`).
+
+Questo caso è rappresentativo perché è il più frequente nell'applicazione (la pagina
+dettaglio torneo lo esegue ad ogni visita) e coinvolge **tre associazioni `@ManyToOne`
+LAZY** per ogni partita, rendendo il problema N+1 facilmente osservabile.
+
+---
+
+### Strategie confrontate
+
+**Strategia 1 — LAZY (comportamento di default)**
+Hibernate carica la lista delle partite con una sola query, ma ogni volta che il codice
+accede a `p.getSquadraHome()`, `p.getSquadraAway()` o `p.getArbitro()` per la prima volta,
+viene eseguita un'ulteriore query. Con N partite e 3 associazioni per partita il totale è:
+
+```
+1 (lista) + N×3 (associazioni) = 1 + N×3 query
+```
+
+Con 2 partite → **7 query**. Con 10 partite → **31 query**.
+
+**Strategia 2 — JOIN FETCH (JPQL)**
+```java
+@Query("SELECT p FROM Partita p JOIN FETCH p.squadraHome JOIN FETCH p.squadraAway JOIN FETCH p.arbitro WHERE p.torneo = :torneo ORDER BY p.dataOra ASC")
+List<Partita> findByTorneoWithTeamsAndReferee(Torneo torneo);
+```
+Hibernate traduce il JOIN FETCH in un'unica `SELECT ... JOIN ...` che porta tutto il
+necessario in un solo round-trip verso il database: **1 query totale**, indipendentemente
+dal numero di partite.
+
+**Strategia 3 — EntityGraph (dichiarativo)**
+```java
+@EntityGraph(attributePaths = {"squadraHome", "squadraAway", "arbitro"})
+@Query("SELECT p FROM Partita p WHERE p.torneo = :torneo ORDER BY p.dataOra ASC")
+List<Partita> findByTorneoWithEntityGraph(Torneo torneo);
+```
+Approccio dichiarativo: si specifica _quali_ associazioni caricare senza modificare la
+query JPQL. Hibernate genera lo stesso JOIN della strategia 2. Più flessibile perché
+riutilizzabile su query diverse senza duplicare i JOIN nella stringa JPQL.
+
+---
+
+### Esperimento
+
+**Classe di test:** `PerformanceAnalysisTest.java`
+**Configurazione:** 5 esecuzioni di warmup + 30 esecuzioni misurate per strategia.
+La cache L1 di Hibernate viene svuotata con `em.clear()` prima di ogni run per
+garantire che ogni misurazione vada effettivamente al database.
+
+**Comando per eseguire:**
+```bash
+./mvnw test -Dtest=PerformanceAnalysisTest
+```
+
+---
+
+### Risultati
+
+╔══════════════════════════════════════════════════════════════════╗
+║         ANALISI PRESTAZIONI ? Strategie JPA Fetch (8.2)          ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Torneo: Serie A Amatoriale    Partite:  2  Esecuzioni: 30       ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Strategia       │  Tempo medio  │  Query/esec  │  Speedup       ║
+╠══════════════════════════════════════════════════════════════════╣
+║  LAZY (N+1)      │     7,477 ms  │    7         │  1.00x (base)  ║
+║  JOIN FETCH      │     2,352 ms  │    1         │   3,18x        ║
+║  EntityGraph     │     5,151 ms  │    1         │   1,45x        ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Risparmio query: da 7 a 1 per caricamento (-6 query/esec)       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+---
+
+### Discussione
+
+Il problema N+1 genera 7 query invece di 1 anche con soli 2 partite — un fattore
+proporzionale a `1 + N×3`. Con un torneo reale di 20 partite si arriverebbero a
+**61 query** contro **1**, con un degrado di prestazioni significativo.
+
+**JOIN FETCH** è la soluzione adottata nell'applicazione per tutti i casi d'uso
+critici. Offre il controllo più diretto sulla query generata ed è verificabile
+immediatamente nel log SQL (`spring.jpa.show-sql=true`).
+
+**EntityGraph** produce risultati equivalenti ma è preferibile quando la stessa
+entità viene caricata da query diverse con attributi facoltativi: si definisce
+il grafo una volta sola sull'entità o sul repository e lo si riutilizza.
+
+**Decisione adottata:** `JOIN FETCH` nei repository perché le associazioni da
+caricare sono sempre le stesse per ogni endpoint, la query è esplicita e
+verificabile, e la complessità aggiuntiva di EntityGraph non è giustificata
+per questo caso d'uso.
+
+---
+
+## 🔲 TODO — Da completare
 - [ ] Aggiungere più dati di test (più tornei, squadre, partite)
 - [ ] (Bonus) Paginazione sulla lista tornei e squadre
 - [ ] (Bonus) Upload immagine per squadra/giocatore

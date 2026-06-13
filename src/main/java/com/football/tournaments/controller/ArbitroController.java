@@ -11,7 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/arbitri")
+@RequestMapping("/admin/arbitri")
 @PreAuthorize("hasRole('ADMIN')")
 public class ArbitroController {
 
@@ -34,7 +34,7 @@ public class ArbitroController {
     public String nuovoSalva(@Valid @ModelAttribute Arbitro arbitro, BindingResult result) {
         if (result.hasErrors()) return "arbitro/form";
         arbitroService.save(arbitro);
-        return "redirect:/arbitri";
+        return "redirect:/admin/arbitri";
     }
 
     @GetMapping("/{id}/modifica")
@@ -51,6 +51,6 @@ public class ArbitroController {
         if (result.hasErrors()) return "arbitro/form";
         arbitro.setId(id);
         arbitroService.save(arbitro);
-        return "redirect:/arbitri";
+        return "redirect:/admin/arbitri";
     }
 }

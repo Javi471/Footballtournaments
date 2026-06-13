@@ -17,7 +17,7 @@
                 <h1 class="page-title">Tournaments</h1>
                 <p class="page-subtitle">All active amateur tournaments</p>
             </div>
-            <a th:href="@{/tornei/nuovo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">
+            <a th:href="@{/admin/tornei/nuovo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">
                 + New Tournament
             </a>
         </div>
@@ -39,11 +39,11 @@
                 <p class="card-text" th:text="${torneo.descrizione}"></p>
             </div>
             <div class="card-footer">
-                <a th:href="@{/tornei/{id}(id=${torneo.id})}" class="btn btn-ghost btn-sm">Details</a>
-                <a th:href="@{/tornei/{id}/classifica(id=${torneo.id})}" class="btn btn-primary btn-sm">Standings</a>
+                <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei/{id}(id=${torneo.id})}" class="btn btn-primary btn-sm">Details</a>
+                <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei/{id}(id=${torneo.id})}" class="btn btn-primary btn-sm">Details</a>
                 <div sec:authorize="hasRole('ADMIN')" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
-                    <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Edit</a>
-                    <form th:action="@{/tornei/{id}/elimina(id=${torneo.id})}" method="post" style="display:inline"
+                    <a th:href="@{/admin/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Edit</a>
+                    <form th:action="@{/admin/tornei/{id}/elimina(id=${torneo.id})}" method="post" style="display:inline"
                           onsubmit="return confirm('Delete this tournament?')">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>

@@ -16,7 +16,7 @@
                 <h1 class="page-title">Referees</h1>
                 <p class="page-subtitle">Registered match officials</p>
             </div>
-            <a th:href="@{/arbitri/nuovo}" class="btn btn-primary">+ New Referee</a>
+            <a th:href="@{/admin/arbitri/nuovo}" class="btn btn-primary">+ New Referee</a>
         </div>
     </div>
 </div>
@@ -43,7 +43,7 @@
                     <td th:text="${a.nome}"></td>
                     <td><span class="badge badge-teal" th:text="${a.codiceArbitrale}"></span></td>
                     <td>
-                        <a th:href="@{/arbitri/{id}/modifica(id=${a.id})}" class="btn btn-ghost btn-sm">Edit</a>
+                        <a th:href="@{/admin/arbitri/{id}/modifica(id=${a.id})}" class="btn btn-ghost btn-sm">Edit</a>
                     </td>
                 </tr>
             </tbody>

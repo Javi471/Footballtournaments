@@ -7,13 +7,13 @@
 <div class="page-wrapper">
     <div class="form-card" style="max-width:760px">
         <nav class="breadcrumb" style="margin-bottom:20px">
-            <a th:href="@{/tornei}">Tournaments</a>
+            <a th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
             <span>Register Match</span>
         </nav>
         <h2>Register Match</h2>
 
-        <form th:action="@{/partite/nuova}" method="post">
+        <form th:action="@{/admin/partite/nuova}" method="post">
 
             <div class="form-group">
                 <label>Tournament *</label>
@@ -54,7 +54,15 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Date &amp; Time *</label>
-                    <input type="datetime-local" name="dataOra" required/>
+                    <div style="position:relative">
+                        <input type="text" id="dataOraPicker" required
+                               placeholder="Select date &amp; time…"
+                               style="cursor:pointer;padding-right:38px"/>
+                        <!-- hidden field Spring reads -->
+                        <input type="hidden" name="dataOra" id="dataOraHidden"/>
+                        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                                     font-size:16px;pointer-events:none;color:var(--teal-soft)">📅</span>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Venue</label>
@@ -63,12 +71,33 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/tornei}" class="btn btn-ghost">Cancel</a>
+                <a th:href="@{/admin/tornei}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Register Match</button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+flatpickr("#dataOraPicker", {
+    enableTime: true,
+    dateFormat: "d/m/Y H:i",
+    time_24hr: true,
+    minuteIncrement: 15,
+    disableMobile: true,
+    onChange: function(selectedDates) {
+        if (selectedDates.length > 0) {
+            const d = selectedDates[0];
+            const iso = d.getFullYear() + '-'
+                + String(d.getMonth()+1).padStart(2,'0') + '-'
+                + String(d.getDate()).padStart(2,'0') + 'T'
+                + String(d.getHours()).padStart(2,'0') + ':'
+                + String(d.getMinutes()).padStart(2,'0');
+            document.getElementById('dataOraHidden').value = iso;
+        }
+    }
+});
+</script>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

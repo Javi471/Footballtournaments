@@ -13,7 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/partite")
 public class PartitaController {
 
     @Autowired private PartitaService partitaService;
@@ -23,7 +22,9 @@ public class PartitaController {
     @Autowired private CommentoService commentoService;
     @Autowired private UserService userService;
 
-    @GetMapping("/{id}")
+    // ── Public ────────────────────────────────────────────────────────────
+
+    @GetMapping("/partite/{id}")
     public String dettaglio(@PathVariable Long id, Model model,
                              @AuthenticationPrincipal UserDetails principal) {
         Partita partita = partitaService.findByIdWithDetails(id)
@@ -38,7 +39,9 @@ public class PartitaController {
         return "partita/dettaglio";
     }
 
-    @GetMapping("/nuova")
+    // ── Admin ─────────────────────────────────────────────────────────────
+
+    @GetMapping("/admin/partite/nuova")
     @PreAuthorize("hasRole('ADMIN')")
     public String nuovaForm(Model model) {
         model.addAttribute("partita", new Partita());
@@ -48,7 +51,7 @@ public class PartitaController {
         return "partita/form";
     }
 
-    @PostMapping("/nuova")
+    @PostMapping("/admin/partite/nuova")
     @PreAuthorize("hasRole('ADMIN')")
     public String nuovaSalva(@ModelAttribute Partita partita,
                               @RequestParam Long torneoId,
@@ -70,10 +73,10 @@ public class PartitaController {
         partita.setSquadraAway(away);
         partita.setArbitro(arbitro);
         Partita salvata = partitaService.save(partita);
-        return "redirect:/partite/" + salvata.getId();
+        return "redirect:/admin/tornei/" + partita.getTorneo().getId();
     }
 
-    @GetMapping("/{id}/risultato")
+    @GetMapping("/admin/partite/{id}/risultato")
     @PreAuthorize("hasRole('ADMIN')")
     public String risultatoForm(@PathVariable Long id, Model model) {
         Partita partita = partitaService.findByIdWithDetails(id)
@@ -82,22 +85,23 @@ public class PartitaController {
         return "partita/risultato";
     }
 
-    @PostMapping("/{id}/risultato")
+    @PostMapping("/admin/partite/{id}/risultato")
     @PreAuthorize("hasRole('ADMIN')")
     public String risultatoSalva(@PathVariable Long id,
                                   @RequestParam int goalsHome,
                                   @RequestParam int goalsAway) {
         partitaService.registraRisultato(id, goalsHome, goalsAway);
-        return "redirect:/partite/" + id;
+        Partita p = partitaService.findByIdWithDetails(id).orElseThrow();
+        return "redirect:/admin/tornei/" + p.getTorneo().getId();
     }
 
-    @PostMapping("/{id}/elimina")
+    @PostMapping("/admin/partite/{id}/elimina")
     @PreAuthorize("hasRole('ADMIN')")
     public String elimina(@PathVariable Long id) {
         Partita partita = partitaService.findByIdWithDetails(id)
             .orElseThrow(() -> new RuntimeException("Partita non trovata"));
         Long torneoId = partita.getTorneo().getId();
         partitaService.deleteById(id);
-        return "redirect:/tornei/" + torneoId;
+        return "redirect:/admin/tornei/" + torneoId;
     }
 }

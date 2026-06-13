@@ -7,13 +7,13 @@
 <div class="page-wrapper">
     <div class="form-card">
         <nav class="breadcrumb" style="margin-bottom:20px">
-            <a th:href="@{/tornei}">Tournaments</a>
+            <a th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
             <span th:text="${torneo.id != null} ? 'Edit Tournament' : 'New Tournament'"></span>
         </nav>
         <h2 th:text="${torneo.id != null} ? 'Edit Tournament' : 'New Tournament'"></h2>
 
-        <form th:action="${torneo.id != null} ? @{/tornei/{id}/modifica(id=${torneo.id})} : @{/tornei/nuovo}"
+        <form th:action="${torneo.id != null} ? @{/admin/tornei/{id}/modifica(id=${torneo.id})} : @{/admin/tornei/nuovo}"
               th:object="${torneo}" method="post">
 
             <div class="form-group">
@@ -46,7 +46,7 @@
             </div>
 
             <div class="form-actions">
-                <a th:href="@{/tornei}" class="btn btn-ghost">Cancel</a>
+                <a th:href="@{/admin/tornei}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save Tournament</button>
             </div>
         </form>

@@ -27,7 +27,6 @@ public class User {
     @Column(unique = true)   // nullable at DB level so existing rows don't break migration
     private String email;
 
-    @NotBlank
     @Column(nullable = false)
     private String password;
 
