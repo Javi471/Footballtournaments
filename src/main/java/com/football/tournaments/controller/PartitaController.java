@@ -2,14 +2,12 @@ package com.football.tournaments.controller;
 
 import com.football.tournaments.model.*;
 import com.football.tournaments.service.*;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -20,7 +18,6 @@ public class PartitaController {
     @Autowired private SquadraService squadraService;
     @Autowired private ArbitroService arbitroService;
     @Autowired private CommentoService commentoService;
-    @Autowired private UserService userService;
 
     // ── Public ────────────────────────────────────────────────────────────
 
@@ -72,7 +69,7 @@ public class PartitaController {
         partita.setSquadraHome(home);
         partita.setSquadraAway(away);
         partita.setArbitro(arbitro);
-        Partita salvata = partitaService.save(partita);
+        partitaService.save(partita);
         return "redirect:/admin/tornei/" + partita.getTorneo().getId();
     }
 
