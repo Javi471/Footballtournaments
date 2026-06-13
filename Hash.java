@@ -1,1 +1,0 @@
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; public class Hash { public static void main(String[] a) { var e = new BCryptPasswordEncoder(); System.out.println("Admin123=" + e.encode("Admin123")); System.out.println("User123=" + e.encode("User123")); } }
