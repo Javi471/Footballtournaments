@@ -28,6 +28,7 @@ public class Squadra {
     @NotBlank
     private String citta;
 
+
     // Ruta de la imagen del equipo (guardada en /images/squadre/)
     private String imagePath;
 
