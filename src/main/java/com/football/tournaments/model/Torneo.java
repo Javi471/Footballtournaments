@@ -1,5 +1,6 @@
 package com.football.tournaments.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +38,8 @@ public class Torneo {
     )
     private List<Squadra> squadre = new ArrayList<>();
 
+    // @JsonIgnore: evita el bucle Torneo → Partita → Torneo → ... al convertir a JSON
+    @JsonIgnore
     @OneToMany(mappedBy = "torneo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Partita> partite = new ArrayList<>();
 

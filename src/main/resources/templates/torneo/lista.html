@@ -1,12 +1,19 @@
 <!DOCTYPE html>
+<!-- Página: lista de todos los torneos disponibles -->
+<!-- URL pública: GET /tornei  |  URL admin: GET /admin/tornei -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- th:replace: sustituye este <head> por el fragmento head('Tournaments') de layout.html -->
 <head th:replace="~{fragments/layout :: head('Tournaments')}"></head>
 <body>
+<!-- Inserta la barra de navegación desde layout.html -->
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Cabecera de la página con fondo con rayas diagonales decorativas -->
 <div class="hero-stripe">
     <svg class="stripe-svg" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Triángulos decorativos de fondo en color verde-azulado con baja opacidad -->
         <polygon points="0,200 400,0 1440,0 1440,200" fill="rgba(43,183,168,.06)"/>
         <polygon points="0,200 700,60 1440,120 1440,200" fill="rgba(43,183,168,.03)"/>
     </svg>
@@ -17,6 +24,7 @@
                 <h1 class="page-title">Tournaments</h1>
                 <p class="page-subtitle">All active amateur tournaments</p>
             </div>
+            <!-- Botón "+ New Tournament": solo visible para ADMIN (sec:authorize) -->
             <a th:href="@{/admin/tornei/nuovo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">
                 + New Tournament
             </a>
@@ -25,24 +33,38 @@
 </div>
 
 <div class="page-wrapper">
+    <!-- Estado vacío: se muestra solo si la lista de torneos está vacía -->
+    <!-- th:if="${#lists.isEmpty(tornei)}": comprueba si la lista no tiene elementos -->
     <div th:if="${#lists.isEmpty(tornei)}" class="empty-state">
         <div class="empty-icon">🏆</div>
         <p>No tournaments available at the moment.</p>
     </div>
 
+    <!-- Grid de tarjetas: una tarjeta por torneo -->
     <div class="card-grid">
+        <!-- th:each="torneo : ${tornei}": itera sobre la lista enviada por el controller -->
+        <!-- El controller añade "tornei" al Model con model.addAttribute("tornei", lista) -->
         <div class="card" th:each="torneo : ${tornei}">
             <div class="card-accent-bar"></div>
             <div class="card-body">
+                <!-- th:text: muestra el año del torneo -->
                 <div class="card-meta" th:text="'Year ' + ${torneo.anno}"></div>
+                <!-- th:text: muestra el nombre del torneo -->
                 <h3 class="card-title" th:text="${torneo.nome}"></h3>
+                <!-- th:text: muestra la descripción del torneo -->
                 <p class="card-text" th:text="${torneo.descrizione}"></p>
             </div>
             <div class="card-footer">
+                <!-- Enlace "Details": URL diferente para USER y ADMIN -->
+                <!-- sec:authorize: muestra uno u otro según el rol -->
                 <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei/{id}(id=${torneo.id})}" class="btn btn-primary btn-sm">Details</a>
                 <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei/{id}(id=${torneo.id})}" class="btn btn-primary btn-sm">Details</a>
+
+                <!-- Botones de editar y borrar: SOLO visibles para ADMIN -->
                 <div sec:authorize="hasRole('ADMIN')" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
                     <a th:href="@{/admin/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Edit</a>
+                    <!-- Formulario POST para borrar el torneo (los DELETE se hacen con POST en HTML) -->
+                    <!-- onsubmit: pide confirmación antes de borrar -->
                     <form th:action="@{/admin/tornei/{id}/elimina(id=${torneo.id})}" method="post" style="display:inline"
                           onsubmit="return confirm('Delete this tournament?')">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
@@ -53,6 +75,7 @@
     </div>
 </div>
 
+<!-- Inserta el pie de página desde layout.html -->
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

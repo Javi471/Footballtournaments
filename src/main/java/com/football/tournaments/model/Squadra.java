@@ -1,5 +1,6 @@
 package com.football.tournaments.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,9 +33,15 @@ public class Squadra {
     // Ruta de la imagen del equipo (guardada en /images/squadre/)
     private String imagePath;
 
+    // @JsonIgnore: evita el bucle infinito al convertir a JSON
+    // Squadra → Giocatore → Squadra → ... sin esto sería infinito
+    @JsonIgnore
     @OneToMany(mappedBy = "squadra", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Giocatore> giocatori = new ArrayList<>();
 
+    // @JsonIgnore: evita el bucle infinito al convertir a JSON
+    // Squadra → Torneo → Squadra → Torneo → ... sin esto sería infinito
+    @JsonIgnore
     @ManyToMany(mappedBy = "squadre")
     private List<Torneo> tornei = new ArrayList<>();
 

@@ -1,9 +1,13 @@
 <!DOCTYPE html>
+<!-- Página: lista de todos los árbitros registrados (solo ADMIN) -->
+<!-- URL: GET /admin/arbitri -->
+<!-- Solo accesible para ADMIN (SecurityConfig + @PreAuthorize en ArbitroController) -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Referees')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Cabecera con fondo decorativo -->
 <div class="hero-stripe">
     <svg class="stripe-svg" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="0,200 400,0 1440,0 1440,200" fill="rgba(43,183,168,.06)"/>
@@ -16,17 +20,23 @@
                 <h1 class="page-title">Referees</h1>
                 <p class="page-subtitle">Registered match officials</p>
             </div>
+            <!-- Botón para crear un nuevo árbitro -->
             <a th:href="@{/admin/arbitri/nuovo}" class="btn btn-primary">+ New Referee</a>
         </div>
     </div>
 </div>
 
 <div class="page-wrapper">
+    <!-- Estado vacío: si no hay árbitros registrados -->
+    <!-- #lists.isEmpty(): devuelve true si la lista no tiene elementos -->
+    <!-- 'arbitri' viene del controller: arbitroService.findAll() -->
     <div th:if="${#lists.isEmpty(arbitri)}" class="empty-state">
         <div class="empty-icon">⚖️</div>
         <p>No referees registered yet.</p>
     </div>
 
+    <!-- Tabla de árbitros: solo si hay al menos uno -->
+    <!-- th:unless: lo contrario de th:if — se muestra si la lista NO está vacía -->
     <div class="table-wrap" th:unless="${#lists.isEmpty(arbitri)}">
         <table class="table">
             <thead>
@@ -38,11 +48,16 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- th:each="a : ${arbitri}": una fila por árbitro -->
+                <!-- La variable de iteración es 'a' (de arbitro) -->
                 <tr th:each="a : ${arbitri}">
                     <td th:text="${a.cognome}"></td>
                     <td th:text="${a.nome}"></td>
+                    <!-- Código arbitral: identificador único del árbitro (ej: "ARB-001") -->
+                    <!-- Se muestra como badge para destacarlo visualmente -->
                     <td><span class="badge badge-teal" th:text="${a.codiceArbitrale}"></span></td>
                     <td>
+                        <!-- Solo hay edición, no borrado (los árbitros no se eliminan desde la UI) -->
                         <a th:href="@{/admin/arbitri/{id}/modifica(id=${a.id})}" class="btn btn-ghost btn-sm">Edit</a>
                     </td>
                 </tr>

@@ -1,22 +1,30 @@
 <!DOCTYPE html>
+<!-- Página: formulario de inicio de sesión -->
+<!-- URL: GET /login?show=true (el AuthController redirige a /tornei si no hay parámetros) -->
+<!-- Soporta dos métodos de login: formulario (usuario+contraseña) y OAuth2 (GitHub) -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Login')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Animación decorativa del balón de fútbol (solo visual, aria-hidden) -->
 <div class="soccer-anim" aria-hidden="true">
   <div class="soccer-ball-x">
     <div class="soccer-ball-y">
+      <!-- SVG del balón de fútbol con gradiente radial y manchas negras -->
       <svg class="soccer-ball-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
+          <!-- Gradiente radial que da efecto 3D al balón (blanco en el centro, gris en los bordes) -->
           <radialGradient id="sball" cx="36%" cy="30%" r="66%">
             <stop offset="0%" stop-color="#ffffff"/>
             <stop offset="55%" stop-color="#e8e8e8"/>
             <stop offset="100%" stop-color="#aaaaaa"/>
           </radialGradient>
+          <!-- clipPath: recorta los polígonos negros al interior del círculo -->
           <clipPath id="sclip"><circle cx="50" cy="50" r="46"/></clipPath>
         </defs>
         <circle cx="50" cy="50" r="46" fill="url(#sball)"/>
+        <!-- Manchas hexagonales negras del balón, recortadas al círculo -->
         <polygon clip-path="url(#sclip)" fill="#111" points="50,20 63,30 58,46 42,46 37,30"/>
         <polygon clip-path="url(#sclip)" fill="#111" points="74,12 86,25 81,40 66,38 63,22"/>
         <polygon clip-path="url(#sclip)" fill="#111" points="83,52 90,67 78,78 65,71 64,55"/>
@@ -24,6 +32,7 @@
         <polygon clip-path="url(#sclip)" fill="#111" points="37,74 23,89 8,82 8,65 24,59"/>
         <polygon clip-path="url(#sclip)" fill="#111" points="17,50 9,35 22,24 35,31 36,47"/>
         <polygon clip-path="url(#sclip)" fill="#111" points="26,10 40,8 48,22 37,31 22,26"/>
+        <!-- Reflejo de luz blanco semitransparente para efecto 3D -->
         <ellipse cx="31" cy="26" rx="11" ry="7" fill="rgba(255,255,255,0.6)" transform="rotate(-30 31 26)"/>
         <circle cx="50" cy="50" r="46" fill="none" stroke="#909090" stroke-width="1.2"/>
       </svg>
@@ -31,34 +40,49 @@
   </div>
 </div>
 
+<!-- Formulario de login centrado en la página -->
 <div class="page-wrapper" style="max-width:480px;margin-top:80px;position:relative;z-index:10">
     <div class="form-card">
         <div style="text-align:center;margin-bottom:28px">
             <span class="eyebrow">Welcome back</span>
             <h2 style="margin-top:8px">Log In</h2>
         </div>
+
+        <!-- Alerta de error: aparece cuando Spring Security añade ?error a la URL tras un fallo de login -->
+        <!-- th:if="${param.error}": comprueba si existe el parámetro "error" en la URL -->
         <div th:if="${param.error}" class="alert alert-error">Incorrect username or password.</div>
+
+        <!-- Alerta de éxito: aparece tras registrarse correctamente (el AuthController añade ?registered) -->
         <div th:if="${param.registered}" class="alert alert-success">Registration successful! You can now sign in.</div>
+
+        <!-- Formulario de login: Spring Security intercepta el POST /login automáticamente -->
+        <!-- SecurityConfig.formLogin().loginProcessingUrl("/login") define que /login procesa el login -->
         <form th:action="@{/login}" method="post">
             <div class="form-group">
                 <label>Username</label>
+                <!-- name="username": Spring Security busca exactamente este nombre de parámetro -->
                 <input type="text" name="username" required autofocus placeholder="Your username"/>
             </div>
             <div class="form-group">
                 <label>Password</label>
+                <!-- name="password": Spring Security busca exactamente este nombre de parámetro -->
                 <input type="password" name="password" required placeholder="••••••••"/>
             </div>
+            <!-- El token CSRF se añade automáticamente por Thymeleaf en todos los formularios POST -->
+            <!-- Sin este token, Spring Security rechazaría el formulario como posible ataque CSRF -->
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Log In</button>
         </form>
 
-        <!-- Separador -->
+        <!-- Separador visual entre login con formulario y login con GitHub -->
         <div style="display:flex; align-items:center; gap:12px; margin:20px 0">
             <div style="flex:1; height:1px; background:var(--border)"></div>
             <span style="color:var(--muted); font-size:13px">or</span>
             <div style="flex:1; height:1px; background:var(--border)"></div>
         </div>
 
-        <!-- Botón OAuth GitHub -->
+        <!-- Botón de login con GitHub (OAuth2) -->
+        <!-- /oauth2/authorization/github: URL de Spring Security que inicia el flujo OAuth2 con GitHub -->
+        <!-- Spring redirige al usuario a GitHub, que devuelve un token, que CustomOAuth2UserService procesa -->
         <a href="/oauth2/authorization/github"
            style="display:flex; align-items:center; justify-content:center; gap:10px;
                   width:100%; padding:11px 0; border-radius:8px;
@@ -67,7 +91,7 @@
                   transition:background .2s"
            onmouseover="this.style.background='#3a3f45'"
            onmouseout="this.style.background='#24292e'">
-            <!-- Icono de GitHub -->
+            <!-- Logo oficial de GitHub en SVG -->
             <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58
                          0-.28-.01-1.03-.02-2.03-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76
@@ -81,6 +105,7 @@
             Login with GitHub
         </a>
 
+        <!-- Enlace a la página de registro para usuarios nuevos -->
         <p class="form-footer">Don't have an account? <a th:href="@{/register}">Sign up</a></p>
     </div>
 </div>

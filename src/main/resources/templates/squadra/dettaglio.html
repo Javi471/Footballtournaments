@@ -1,16 +1,22 @@
 <!DOCTYPE html>
+<!-- Página: detalle de un equipo — logo, info, lista de jugadores con filtros y ordenación -->
+<!-- URL pública: GET /squadre/{id}  |  URL admin: GET /admin/squadre/{id} -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Título dinámico: nombre del equipo -->
 <head th:replace="~{fragments/layout :: head(${squadra.nome})}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Cabecera del equipo con logo, nombre, ciudad y badges -->
 <div class="detail-hero">
     <svg class="stripe-svg" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="0,220 500,0 1440,0 1440,220" fill="rgba(43,183,168,.07)"/>
         <polygon points="0,220 900,80 1440,150 1440,220" fill="rgba(43,183,168,.04)"/>
     </svg>
     <div class="inner">
+        <!-- Migas de pan: Teams › Nombre del equipo -->
         <nav class="breadcrumb">
             <a sec:authorize="!hasRole('ADMIN')" th:href="@{/squadre}">Teams</a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/squadre}">Teams</a>
@@ -20,7 +26,7 @@
         <div class="page-header" style="margin-bottom:0">
             <div class="page-header-left" style="display:flex; align-items:center; gap:20px">
 
-                <!-- Imagen del equipo (si existe) -->
+                <!-- Logo del equipo: solo se muestra si tiene imagen (imagePath != null) -->
                 <img th:if="${squadra.imagePath != null}"
                      th:src="${squadra.imagePath}"
                      alt="Logo equipo"
@@ -29,20 +35,27 @@
                             flex-shrink:0"/>
 
                 <div>
+                <!-- Ciudad del equipo como subtítulo pequeño -->
                 <span class="eyebrow" th:text="${squadra.citta}"></span>
                 <h1 class="page-title" th:text="${squadra.nome}"></h1>
                 <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                    <!-- Badge con el año de fundación del equipo -->
                     <span class="badge badge-teal" th:text="'Founded: ' + ${squadra.annoFondazione}"></span>
+                    <!-- #lists.size(): cuenta cuántos jugadores tiene el equipo -->
+                    <!-- squadra.giocatori es la lista cargada por JPA (@OneToMany) -->
                     <span class="badge badge-gray"
                           th:text="${#lists.size(squadra.giocatori)} + ' players'"></span>
                 </div>
                 </div>
             </div>
+            <!-- Botones "Edit Team" y "+ Player": solo para ADMIN -->
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"
                  sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/squadre/{id}/modifica(id=${squadra.id})}" class="btn btn-ghost btn-sm">
                     Edit Team
                 </a>
+                <!-- Añadir jugador pasando el id del equipo como parámetro URL -->
+                <!-- El controller de giocatore usa squadraId para preseleccionar el equipo en el formulario -->
                 <a th:href="@{/admin/giocatori/nuovo(squadraId=${squadra.id})}" class="btn btn-primary btn-sm">
                     + Player
                 </a>
@@ -56,15 +69,21 @@
         <div class="section-header">
             <h2 class="section-title">Squad Players</h2>
         </div>
+        <!-- Estado vacío: si la lista de jugadores está vacía -->
         <div th:if="${#lists.isEmpty(squadra.giocatori)}" class="empty-state">
             <div class="empty-icon">👤</div>
             <p>No players registered for this team.</p>
         </div>
+
+        <!-- Contenido de la tabla: solo si hay jugadores -->
+        <!-- th:unless: lo contrario de th:if — se muestra si la lista NO está vacía -->
         <div th:unless="${#lists.isEmpty(squadra.giocatori)}">
+            <!-- Buscador de jugadores: filtra la tabla con JavaScript en tiempo real -->
             <div class="player-search">
                 <input type="text" id="playerSearch" placeholder="Search by name…"
                        oninput="applyFilters()" autocomplete="off"/>
             </div>
+            <!-- Filtros por posición: los botones llaman a setPosition() de JavaScript -->
             <div class="pos-filter">
                 <button class="pos-btn active" data-pos="" onclick="setPosition(null)">All</button>
                 <button class="pos-btn" data-pos="Goalkeeper" onclick="setPosition('Goalkeeper')">Goalkeeper</button>
@@ -72,10 +91,13 @@
                 <button class="pos-btn" data-pos="Midfielder" onclick="setPosition('Midfielder')">Midfielder</button>
                 <button class="pos-btn" data-pos="Forward"    onclick="setPosition('Forward')">Forward</button>
             </div>
+            <!-- Tabla de jugadores — Thymeleaf la genera en el servidor -->
+            <!-- JavaScript la filtra y ordena en el cliente sin volver al servidor -->
             <div class="table-wrap">
                 <table class="table" id="playerTable">
                     <thead>
                         <tr>
+                            <!-- onclick="sortTable(...)": ordena la tabla por esa columna al hacer clic -->
                             <th class="sortable" onclick="sortTable(0,'str')">
                                 First Name <span class="sort-icon" id="si0">⇅</span>
                             </th>
@@ -91,14 +113,19 @@
                             <th class="sortable center" onclick="sortTable(4,'num')">
                                 Height <span class="sort-icon" id="si4">⇅</span>
                             </th>
+                            <!-- Columna de acciones: solo visible para ADMIN -->
                             <th sec:authorize="hasRole('ADMIN')"></th>
                         </tr>
                     </thead>
                     <tbody id="playerTbody">
+                        <!-- th:each="g : ${squadra.giocatori}": una fila por jugador -->
                         <tr th:each="g : ${squadra.giocatori}" class="player-row">
                             <td th:text="${g.nome}"></td>
                             <td th:text="${g.cognome}"></td>
                             <td>
+                                <!-- Badge de posición con color diferente según el rol -->
+                                <!-- th:classappend: añade una clase CSS según la condición -->
+                                <!-- Portiere=teal, Attaccante=red, resto=gray -->
                                 <span class="badge"
                                       th:classappend="${g.ruolo == 'Portiere'} ? ' badge-teal' : (${g.ruolo == 'Attaccante'} ? ' badge-red' : ' badge-gray')"
                                       th:text="${g.ruolo == 'Portiere'} ? 'Goalkeeper' :
@@ -106,8 +133,11 @@
                                                (${g.ruolo == 'Centrocampista'} ? 'Midfielder' : 'Forward'))">
                                 </span>
                             </td>
+                            <!-- #temporals.format: formatea LocalDate como "dd/MM/yyyy" -->
                             <td th:text="${#temporals.format(g.dataNascita, 'dd/MM/yyyy')}"></td>
+                            <!-- Altura: muestra "178 cm" o "—" si es null -->
                             <td class="center" th:text="${g.altezza != null} ? ${g.altezza} + ' cm' : '—'"></td>
+                            <!-- Botones Edit y Delete del jugador: solo para ADMIN -->
                             <td sec:authorize="hasRole('ADMIN')" style="white-space:nowrap">
                                 <a th:href="@{/admin/giocatori/{id}/modifica(id=${g.id})}" class="btn btn-ghost btn-sm">
                                     Edit
@@ -118,6 +148,7 @@
                                 </form>
                             </td>
                         </tr>
+                        <!-- Fila que aparece cuando ningún jugador coincide con el filtro -->
                         <tr class="no-results-row" id="noResultsRow">
                             <td colspan="6">No players match your search.</td>
                         </tr>
@@ -128,10 +159,14 @@
     </div>
 </div>
 
+<!-- JavaScript del lado del cliente: filtrado y ordenación de la tabla de jugadores -->
+<!-- Todo es client-side — no hace peticiones al servidor -->
 <script>
+// Estado de ordenación: columna actual y dirección (1=ascendente, -1=descendente)
 var sortState = { col: -1, dir: 1 };
-var currentPosition = null;
+var currentPosition = null; // posición seleccionada para filtrar (null = todas)
 
+// Cambia el filtro de posición y vuelve a aplicar todos los filtros
 function setPosition(pos) {
     currentPosition = pos;
     document.querySelectorAll('.pos-btn').forEach(function(btn) {
@@ -140,25 +175,30 @@ function setPosition(pos) {
     applyFilters();
 }
 
+// Aplica el filtro de búsqueda de texto Y el filtro de posición simultáneamente
 function applyFilters() {
     var q = document.getElementById('playerSearch').value.toLowerCase().trim();
     var rows = document.querySelectorAll('#playerTbody .player-row');
     var visible = 0;
     rows.forEach(function(row) {
-        var posText = row.cells[2].textContent.trim();
+        var posText = row.cells[2].textContent.trim(); // texto de la columna "Position"
         var matchPos    = !currentPosition || posText === currentPosition;
         var matchSearch = q === '' || row.textContent.toLowerCase().includes(q);
-        var show = matchPos && matchSearch;
+        var show = matchPos && matchSearch; // tiene que cumplir AMBOS filtros
         row.style.display = show ? '' : 'none';
         if (show) visible++;
     });
+    // Si no hay resultados, muestra la fila de aviso
     document.getElementById('noResultsRow').style.display = visible === 0 ? '' : 'none';
 }
 
+// Ordena la tabla por la columna indicada al hacer clic en el encabezado
+// type: 'str' (texto), 'date' (fecha dd/MM/yyyy), 'num' (número)
 function sortTable(colIndex, type) {
     var tbody = document.getElementById('playerTbody');
     var rows  = Array.from(tbody.querySelectorAll('.player-row'));
 
+    // Alterna dirección si es la misma columna; reinicia a ascendente si es diferente
     sortState.dir = (sortState.col === colIndex) ? -sortState.dir : 1;
     sortState.col = colIndex;
 
@@ -169,12 +209,13 @@ function sortTable(colIndex, type) {
         if (type === 'num') {
             result = ((parseFloat(aVal) || 0) - (parseFloat(bVal) || 0)) * sortState.dir;
         } else if (type === 'date') {
+            // Convierte "dd/MM/yyyy" a Date para comparar fechas correctamente
             var p = function(s) { var d = s.split('/'); return new Date(d[2], d[1]-1, d[0]); };
             result = (p(aVal) - p(bVal)) * sortState.dir;
         } else {
             result = aVal.localeCompare(bVal) * sortState.dir;
         }
-        // Tiebreaker: first name ↔ last name
+        // Desempate por nombre o apellido como criterio secundario
         if (result === 0 && colIndex === 0)
             result = a.cells[1].textContent.trim().localeCompare(b.cells[1].textContent.trim()) * sortState.dir;
         if (result === 0 && colIndex === 1)
@@ -182,14 +223,16 @@ function sortTable(colIndex, type) {
         return result;
     });
 
+    // Reinserta las filas en el nuevo orden (antes de la fila "sin resultados")
     rows.forEach(function(r) { tbody.insertBefore(r, document.getElementById('noResultsRow')); });
 
+    // Actualiza los iconos de ordenación en los encabezados (▲ / ▼ / ⇅)
     for (var i = 0; i <= 4; i++) {
         var el = document.getElementById('si' + i);
         if (el) el.textContent = (i === colIndex) ? (sortState.dir === 1 ? ' ▲' : ' ▼') : ' ⇅';
     }
 
-    applyFilters();
+    applyFilters(); // vuelve a aplicar filtros después de ordenar
 }
 </script>
 

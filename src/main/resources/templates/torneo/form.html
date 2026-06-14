@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- Página: formulario para crear o editar un torneo (solo ADMIN) -->
+<!-- URL crear: GET /admin/tornei/nuevo  |  URL editar: GET /admin/tornei/{id}/modifica -->
+<!-- El mismo formulario sirve para crear y para editar (se detecta con torneo.id) -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Tournament')}"></head>
 <body>
@@ -6,6 +9,8 @@
 
 <div class="page-wrapper">
     <div class="form-card">
+        <!-- Migas de pan: Tournaments › "Edit Tournament" o "New Tournament" -->
+        <!-- th:text con expresión ternaria: si torneo.id != null → es edición, si no → es nuevo -->
         <nav class="breadcrumb" style="margin-bottom:20px">
             <a th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
@@ -13,38 +18,62 @@
         </nav>
         <h2 th:text="${torneo.id != null} ? 'Edit Tournament' : 'New Tournament'"></h2>
 
+        <!--
+            th:action: la URL de envío del formulario cambia según si es edición o creación
+            - Si torneo.id existe → POST /admin/tornei/{id}/modifica (actualiza)
+            - Si torneo.id es null → POST /admin/tornei/nuevo (crea nuevo)
+
+            th:object="${torneo}": vincula el formulario al objeto Torneo del modelo
+            → Permite usar *{campo} en lugar de ${torneo.campo} dentro del formulario
+        -->
         <form th:action="${torneo.id != null} ? @{/admin/tornei/{id}/modifica(id=${torneo.id})} : @{/admin/tornei/nuovo}"
               th:object="${torneo}" method="post">
 
+            <!-- Campo: Nombre del torneo -->
+            <!-- th:field="*{nome}": vincula este input al campo torneo.nome -->
+            <!-- th:field genera automáticamente id, name y value -->
             <div class="form-group">
                 <label>Name *</label>
                 <input type="text" th:field="*{nome}" required placeholder="e.g. Spring Tournament 2026"/>
+                <!-- th:errors: muestra el mensaje de error de validación @NotBlank si falla -->
+                <!-- th:if="${#fields.hasErrors('nome')}": solo aparece si hay error en ese campo -->
                 <span class="error-msg" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
             </div>
 
+            <!-- Campo: Año del torneo -->
             <div class="form-group">
                 <label>Year *</label>
                 <input type="number" th:field="*{anno}" required min="2000" max="2100" placeholder="2026"/>
                 <span class="error-msg" th:if="${#fields.hasErrors('anno')}" th:errors="*{anno}"></span>
             </div>
 
+            <!-- Campo: Descripción (opcional, texto largo) -->
             <div class="form-group">
                 <label>Description</label>
                 <textarea th:field="*{descrizione}" rows="4"
                           placeholder="Tournament description, rules, prizes..."></textarea>
             </div>
 
+            <!-- Campo: Equipos participantes — una casilla por equipo -->
             <div class="form-group">
                 <label>Participating Teams</label>
                 <div class="checkbox-grid">
+                    <!-- th:each="s : ${tutteLeSquadre}": itera TODOS los equipos de la BD -->
+                    <!-- El controller carga todos los equipos con model.addAttribute("tutteLeSquadre", ...) -->
                     <label class="checkbox-item" th:each="s : ${tutteLeSquadre}">
+                        <!-- name="squadraIds": el controller recibe una lista de ids seleccionados -->
+                        <!-- th:value: valor del checkbox = id del equipo -->
                         <input type="checkbox" name="squadraIds" th:value="${s.id}"
+                               <!-- th:checked: marca la casilla si el equipo ya está en el torneo -->
+                               <!-- torneo.squadre.![id]: extrae la lista de ids de los equipos del torneo -->
+                               <!-- #lists.contains(...): comprueba si el id del equipo está en esa lista -->
                                th:checked="${torneo.squadre != null and #lists.contains(torneo.squadre.![id], s.id)}"/>
                         <span th:text="${s.nome} + ' (' + ${s.citta} + ')'"></span>
                     </label>
                 </div>
             </div>
 
+            <!-- Botones: Cancelar (vuelve a la lista) y Guardar -->
             <div class="form-actions">
                 <a th:href="@{/admin/tornei}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save Tournament</button>

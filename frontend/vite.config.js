@@ -31,6 +31,12 @@ export default defineConfig({
     }
   },
 
+  // Sustituye process.env.NODE_ENV por "production" durante el build
+  // Sin esto el navegador da error "process is not defined" porque process es de Node.js
+  define: {
+    'process.env.NODE_ENV': '"production"'
+  },
+
   // Configuracion del build (compilacion) para produccion
   // Convierte classifica.jsx en classifica.js que puede cargar el navegador
   build: {

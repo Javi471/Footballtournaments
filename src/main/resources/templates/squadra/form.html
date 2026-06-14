@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- Página: formulario para crear o editar un equipo (solo ADMIN) -->
+<!-- URL crear: GET /admin/squadre/nuova  |  URL editar: GET /admin/squadre/{id}/modifica -->
+<!-- enctype="multipart/form-data": permite subir archivos (imagen del equipo) -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Team')}"></head>
 <body>
@@ -6,28 +9,43 @@
 
 <div class="page-wrapper">
     <div class="form-card">
+        <!-- Migas de pan: Teams › "Edit Team" o "New Team" -->
         <nav class="breadcrumb" style="margin-bottom:20px">
             <a th:href="@{/admin/squadre}">Teams</a>
             <span>›</span>
+            <!-- Ternario: si squadra.id != null es edición, si no es creación -->
             <span th:text="${squadra.id != null} ? 'Edit Team' : 'New Team'"></span>
         </nav>
         <h2 th:text="${squadra.id != null} ? 'Edit Team' : 'New Team'"></h2>
 
+        <!--
+            th:action: URL de envío dinámica
+            - Si squadra.id existe → POST /admin/squadre/{id}/modifica (actualiza)
+            - Si squadra.id es null → POST /admin/squadre/nuova (crea nuevo)
+
+            th:object="${squadra}": vincula el formulario al objeto Squadra del modelo
+            enctype="multipart/form-data": obligatorio para poder subir archivos (imágenes)
+        -->
         <form th:action="${squadra.id != null} ? @{/admin/squadre/{id}/modifica(id=${squadra.id})} : @{/admin/squadre/nuova}"
               th:object="${squadra}" method="post" enctype="multipart/form-data">
 
+            <!-- Campo: Nombre del equipo -->
+            <!-- th:field="*{nome}": vincula este input al campo Squadra.nome (genera id, name y value) -->
             <div class="form-group">
                 <label>Name *</label>
                 <input type="text" th:field="*{nome}" required placeholder="e.g. FC Atletico Roma"/>
+                <!-- th:errors: muestra el mensaje de validación @NotBlank si el campo está vacío -->
                 <span class="error-msg" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
             </div>
 
+            <!-- Campo: Ciudad del equipo -->
             <div class="form-group">
                 <label>City *</label>
                 <input type="text" th:field="*{citta}" required placeholder="e.g. Rome"/>
                 <span class="error-msg" th:if="${#fields.hasErrors('citta')}" th:errors="*{citta}"></span>
             </div>
 
+            <!-- Campo: Año de fundación -->
             <div class="form-group">
                 <label>Founded Year *</label>
                 <input type="number" th:field="*{annoFondazione}" required min="1800" max="2026"
@@ -36,11 +54,12 @@
                       th:errors="*{annoFondazione}"></span>
             </div>
 
-            <!-- Campo para subir la imagen del equipo -->
+            <!-- Campo: Imagen del equipo (upload de archivo) -->
             <div class="form-group">
                 <label>Team Logo / Image</label>
 
-                <!-- Si ya tiene imagen, la mostramos como previsualización -->
+                <!-- Previsualización de la imagen actual si el equipo ya tiene una -->
+                <!-- th:if="${squadra.imagePath != null}": solo si ya tiene imagen guardada -->
                 <div th:if="${squadra.imagePath != null}" style="margin-bottom:10px">
                     <img th:src="${squadra.imagePath}" alt="Imagen actual"
                          style="width:100px; height:100px; object-fit:cover;
@@ -50,7 +69,8 @@
                     </p>
                 </div>
 
-                <!-- Input de archivo -->
+                <!-- Input de archivo: name="immagine" coincide con @RequestParam("immagine") en el controller -->
+                <!-- accept="image/*": el navegador solo muestra archivos de imagen en el selector -->
                 <input type="file" name="immagine" accept="image/*"
                        style="color:var(--text); background:var(--card);
                               border:1px solid var(--border); border-radius:6px;
@@ -60,6 +80,7 @@
                 </p>
             </div>
 
+            <!-- Botones: Cancelar (vuelve a la lista de equipos) y Guardar -->
             <div class="form-actions">
                 <a th:href="@{/admin/squadre}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save Team</button>

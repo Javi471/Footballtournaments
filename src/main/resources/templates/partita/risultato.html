@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- Página: formulario para introducir el resultado de un partido (solo ADMIN) -->
+<!-- URL: GET /admin/partite/{id}/risultato -->
+<!-- Solo disponible para partidos en estado SCHEDULED (pendientes de resultado) -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Enter Score')}"></head>
 <body>
@@ -6,44 +9,59 @@
 
 <div class="page-wrapper" style="max-width:600px">
     <div class="form-card">
+        <!-- Migas de pan: Tournaments › Nombre torneo › Enter Score -->
         <nav class="breadcrumb" style="margin-bottom:20px">
             <a th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
+            <!-- Enlace al torneo del partido: usa partita.torneo.id (relación @ManyToOne) -->
             <a th:href="@{/admin/tornei/{id}(id=${partita.torneo.id})}" th:text="${partita.torneo.nome}"></a>
             <span>›</span>
             <span>Enter Score</span>
         </nav>
         <h2>Enter Score</h2>
 
+        <!-- Tarjeta informativa: muestra los equipos y la fecha del partido -->
         <div style="text-align:center;background:var(--ink-3);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:28px">
             <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap">
+                <!-- Nombres de los equipos (local y visitante) -->
                 <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff"
                       th:text="${partita.squadraHome.nome}"></span>
                 <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted)">VS</span>
                 <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff"
                       th:text="${partita.squadraAway.nome}"></span>
             </div>
+            <!-- Fecha y lugar del partido -->
             <p style="color:var(--muted);font-size:12px;margin-top:8px;letter-spacing:.08em"
                th:text="${#temporals.format(partita.dataOra, 'dd/MM/yyyy HH:mm')} + '  ·  ' + ${partita.luogo}"></p>
         </div>
 
+        <!-- Formulario para introducir el marcador -->
+        <!-- POST /admin/partite/{id}/risultato → llama a partitaService.registraRisultato() -->
+        <!-- registraRisultato: guarda los goles y cambia el estado a PLAYED -->
         <form th:action="@{/admin/partite/{id}/risultato(id=${partita.id})}" method="post">
+            <!-- Grid con dos inputs de goles (local y visitante) separados por un guión -->
             <div class="score-grid">
                 <div class="form-group" style="text-align:center">
+                    <!-- Etiqueta dinámica con el nombre del equipo local -->
                     <label th:text="${partita.squadraHome.nome}"></label>
+                    <!-- name="goalsHome": @RequestParam int goalsHome en el controller -->
+                    <!-- th:value="${partita.goalsHome}": pre-rellena con el valor actual (normalmente 0) -->
                     <input type="number" name="goalsHome" min="0" max="99"
                            th:value="${partita.goalsHome}" required class="score-input"/>
                 </div>
                 <div class="score-sep" style="padding-bottom:11px">—</div>
                 <div class="form-group" style="text-align:center">
                     <label th:text="${partita.squadraAway.nome}"></label>
+                    <!-- name="goalsAway": @RequestParam int goalsAway en el controller -->
                     <input type="number" name="goalsAway" min="0" max="99"
                            th:value="${partita.goalsAway}" required class="score-input"/>
                 </div>
             </div>
 
             <div class="form-actions">
+                <!-- Cancelar: vuelve al detalle del torneo sin guardar -->
                 <a th:href="@{/admin/tornei/{id}(id=${partita.torneo.id})}" class="btn btn-ghost">Cancel</a>
+                <!-- Confirmar: guarda el resultado y cambia el estado a PLAYED -->
                 <button type="submit" class="btn btn-primary">Confirm Score</button>
             </div>
         </form>

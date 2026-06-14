@@ -1,15 +1,20 @@
 <!DOCTYPE html>
+<!-- Página: detalle de un partido — resultado, información y comentarios -->
+<!-- URL: GET /partite/{id} (pública para todos — los botones de ADMIN se ocultan/muestran) -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Match')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Cabecera con migas de pan y título del partido -->
 <div class="detail-hero">
     <svg class="stripe-svg" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="0,220 500,0 1440,0 1440,220" fill="rgba(43,183,168,.07)"/>
     </svg>
     <div class="inner">
+        <!-- Migas de pan: Tournaments › Nombre torneo › Match -->
+        <!-- Los enlaces cambian según el rol (ADMIN vs USER) -->
         <nav class="breadcrumb">
             <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei}">Tournaments</a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei}">Tournaments</a>
@@ -21,13 +26,16 @@
         </nav>
         <div class="page-header" style="margin-bottom:0">
             <div class="page-header-left">
+                <!-- Fecha del partido formateada: "14 June 2026" -->
                 <span class="eyebrow" th:text="${#temporals.format(partita.dataOra, 'dd MMMM yyyy')}"></span>
+                <!-- Título: Equipo local VS Equipo visitante -->
                 <h1 class="page-title" style="font-size:clamp(28px,4vw,44px)">
                     <span th:text="${partita.squadraHome.nome}"></span>
                     <span style="color:var(--teal-soft)"> vs </span>
                     <span th:text="${partita.squadraAway.nome}"></span>
                 </h1>
             </div>
+            <!-- Botón "Enter Score": solo ADMIN y solo si el partido está SCHEDULED (aún no jugado) -->
             <div sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/partite/{id}/risultato(id=${partita.id})}"
                    th:if="${partita.stato.name() == 'SCHEDULED'}"
@@ -39,15 +47,21 @@
 
 <div class="page-wrapper">
 
+    <!-- Sección central: marcador o "VS" según el estado del partido -->
     <div class="match-hero">
+        <!-- Si el partido está PLAYED: muestra el marcador final (ej: "2 — 1") -->
+        <!-- partita.stato.name(): convierte el enum StatoPartita a String ("PLAYED", "SCHEDULED") -->
         <div th:if="${partita.stato.name() == 'PLAYED'}">
             <div class="match-vs-row">
                 <span class="match-team" th:text="${partita.squadraHome.nome}"></span>
+                <!-- Marcador: goalsHome — goalsAway -->
                 <span class="match-score-display"
                       th:text="${partita.goalsHome} + ' — ' + ${partita.goalsAway}"></span>
                 <span class="match-team" th:text="${partita.squadraAway.nome}"></span>
             </div>
         </div>
+        <!-- Si el partido NO está PLAYED: muestra "VS" (partido pendiente) -->
+        <!-- th:unless: se muestra si la condición es FALSA -->
         <div th:unless="${partita.stato.name() == 'PLAYED'}">
             <div class="match-vs-row">
                 <span class="match-team" th:text="${partita.squadraHome.nome}"></span>
@@ -55,33 +69,48 @@
                 <span class="match-team" th:text="${partita.squadraAway.nome}"></span>
             </div>
         </div>
+        <!-- Información del partido: fecha, lugar, árbitro y estado -->
         <div class="match-meta-row">
+            <!-- #temporals.format: formatea LocalDateTime con fecha y hora -->
             <span>📅 <span th:text="${#temporals.format(partita.dataOra, 'dd/MM/yyyy HH:mm')}"></span></span>
             <span>📍 <span th:text="${partita.luogo}"></span></span>
+            <!-- Árbitro: accede a la relación @ManyToOne partita.arbitro -->
             <span>👤 Referee: <span th:text="${partita.arbitro.nome} + ' ' + ${partita.arbitro.cognome}"></span></span>
+            <!-- Badge de estado con color verde (PLAYED), teal (SCHEDULED) o rojo (CANCELLED) -->
             <span class="badge"
                   th:classappend="${partita.stato.name() == 'PLAYED'} ? ' badge-green' : (${partita.stato.name() == 'SCHEDULED'} ? ' badge-teal' : ' badge-red')"
                   th:text="${partita.stato}"></span>
         </div>
     </div>
 
+    <!-- Sección de comentarios -->
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">Comments</h2>
+            <!-- #lists.size(): cuenta los comentarios del partido -->
+            <!-- 'commenti' viene del controller: commentoService.findByPartita(partita) -->
             <span class="badge badge-gray" th:text="${#lists.size(commenti)} + ' comments'"></span>
         </div>
 
+        <!-- Estado vacío: si no hay comentarios todavía -->
         <div th:if="${#lists.isEmpty(commenti)}" class="empty-state" style="padding:32px 0">
             <div class="empty-icon">💬</div>
             <p>No comments yet. Be the first!</p>
         </div>
 
+        <!-- Lista de comentarios: se muestra si hay al menos uno -->
         <div class="comment-list" th:unless="${#lists.isEmpty(commenti)}">
+            <!-- th:each="c : ${commenti}": una tarjeta por comentario -->
             <div class="comment-card" th:each="c : ${commenti}">
                 <div class="comment-header">
+                    <!-- Nombre del usuario que escribió el comentario -->
                     <span class="comment-author" th:text="${c.utente.username}"></span>
+                    <!-- Fecha de creación del comentario -->
                     <span class="comment-date"
                           th:text="${#temporals.format(c.dataCreazione, 'dd/MM/yyyy HH:mm')}"></span>
+                    <!-- Botón "Edit": solo visible si el comentario pertenece al usuario actual -->
+                    <!-- utenteCorrente viene del controller: principal.getUsername() -->
+                    <!-- Compara el usuario logueado con el autor del comentario -->
                     <a th:href="@{/commenti/{id}/modifica(id=${c.id})}"
                        th:if="${utenteCorrente != null and utenteCorrente == c.utente.username}"
                        class="btn btn-ghost btn-sm" style="margin-left:auto">Edit</a>
@@ -90,9 +119,13 @@
             </div>
         </div>
 
+        <!-- Formulario para añadir comentario: SOLO visible si el usuario está autenticado -->
+        <!-- sec:authorize="isAuthenticated()": Spring Security verifica si hay sesión activa -->
         <div sec:authorize="isAuthenticated()" class="comment-form-box">
             <h3>Add a comment</h3>
             <form th:action="@{/commenti/aggiungi}" method="post">
+                <!-- Campo oculto: pasa el id del partido al controller -->
+                <!-- El controller necesita saber a qué partido pertenece el comentario -->
                 <input type="hidden" name="partitaId" th:value="${partita.id}"/>
                 <div class="form-group">
                     <textarea name="testo" rows="3" required
@@ -102,6 +135,8 @@
             </form>
         </div>
 
+        <!-- Aviso para usuarios no autenticados: les invita a iniciar sesión para comentar -->
+        <!-- sec:authorize="!isAuthenticated()": solo si NO está autenticado -->
         <div sec:authorize="!isAuthenticated()" class="alert alert-info" style="margin-top:20px">
             <a th:href="@{/login}">Log in</a> to leave a comment.
         </div>

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
+<!-- Página: lista paginada de todos los equipos -->
+<!-- URL pública: GET /squadre  |  URL admin: GET /admin/squadre -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Teams')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Cabecera con fondo decorativo -->
 <div class="hero-stripe">
     <svg class="stripe-svg" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="0,200 400,0 1440,0 1440,200" fill="rgba(43,183,168,.06)"/>
@@ -15,9 +18,11 @@
             <div class="page-header-left">
                 <span class="eyebrow">👕 Squads &amp; Players</span>
                 <h1 class="page-title">Teams</h1>
+                <!-- page.totalElements: total de equipos en la BD (viene de Page<Squadra>) -->
                 <p class="page-subtitle"
                    th:text="${page.totalElements} + ' teams registered'"></p>
             </div>
+            <!-- Botón "+ New Team": solo visible para ADMIN -->
             <a th:href="@{/admin/squadre/nuova}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary">
                 + New Team
             </a>
@@ -26,23 +31,30 @@
 </div>
 
 <div class="page-wrapper">
+    <!-- Estado vacío: se muestra si no hay ningún equipo registrado -->
     <div th:if="${page.totalElements == 0}" class="empty-state">
         <div class="empty-icon">👕</div>
         <p>No teams registered yet.</p>
     </div>
 
-    <div class="card-grid">
+    <!-- Grid de tarjetas: 2 columnas, una tarjeta por equipo -->
+    <!-- page.content: la lista de equipos de la página actual (el objeto Page de Spring) -->
+    <!-- El controller usa SquadraService.findPage(pageNum) que devuelve Page<Squadra> con 4 por página -->
+    <div class="card-grid" style="grid-template-columns: repeat(2, 1fr)">
+        <!-- th:each="s : ${page.content}": itera los equipos de la página actual -->
         <div class="card" th:each="s : ${page.content}">
             <div class="card-accent-bar"></div>
             <div class="card-body" style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px">
                 <div>
+                    <!-- Muestra la ciudad del equipo como metadato -->
                     <div class="card-meta" th:text="${s.citta}"></div>
                     <h3 class="card-title" th:text="${s.nome}"></h3>
                     <p class="card-text">
                         Founded in <strong style="color:#fff" th:text="${s.annoFondazione}"></strong>
                     </p>
                 </div>
-                <!-- Imagen del equipo (si existe) -->
+                <!-- Logo del equipo: solo se muestra si el equipo tiene imagen subida -->
+                <!-- th:if="${s.imagePath != null}": comprueba si el equipo tiene imagen -->
                 <img th:if="${s.imagePath != null}"
                      th:src="${s.imagePath}"
                      alt="Logo"
@@ -51,8 +63,10 @@
                             flex-shrink:0"/>
             </div>
             <div class="card-footer">
+                <!-- Enlace al detalle del equipo: URL diferente según el rol -->
                 <a sec:authorize="!hasRole('ADMIN')" th:href="@{/squadre/{id}(id=${s.id})}" class="btn btn-primary btn-sm">Squad</a>
                 <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/squadre/{id}(id=${s.id})}" class="btn btn-primary btn-sm">Squad</a>
+                <!-- Botones Edit y Delete: solo para ADMIN -->
                 <div sec:authorize="hasRole('ADMIN')" style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
                     <a th:href="@{/admin/squadre/{id}/modifica(id=${s.id})}" class="btn btn-ghost btn-sm">Edit</a>
                     <form th:action="@{/admin/squadre/{id}/elimina(id=${s.id})}" method="post" style="display:inline"
@@ -64,32 +78,37 @@
         </div>
     </div>
 
-    <!-- Pagination -->
+    <!-- Paginación: solo se muestra si hay más de una página -->
+    <!-- page.totalPages: número total de páginas calculado por Spring Data -->
     <div class="pagination" th:if="${page.totalPages > 1}">
-        <!-- Prev -->
+        <!-- Botón "anterior": desactivado si estamos en la primera página -->
+        <!-- page.first: true si es la primera página -->
         <a th:if="${!page.first}"
            th:href="${baseUrl + '?page=' + (page.number - 1)}"
            class="page-btn" title="Previous">‹</a>
         <span th:if="${page.first}" class="page-btn disabled">‹</span>
 
-        <!-- Page numbers -->
+        <!-- Números de página: #numbers.sequence(0, N) genera [0,1,2,...,N] -->
+        <!-- page.number: número de la página actual (empieza en 0) -->
         <th:block th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <!-- Enlace si NO es la página actual -->
             <a th:if="${i != page.number}"
                th:href="${baseUrl + '?page=' + i}"
                th:text="${i + 1}"
                class="page-btn"></a>
+            <!-- Span (sin enlace) si ES la página actual — se muestra como activo -->
             <span th:if="${i == page.number}"
                   th:text="${i + 1}"
                   class="page-btn active"></span>
         </th:block>
 
-        <!-- Next -->
+        <!-- Botón "siguiente": desactivado si estamos en la última página -->
         <a th:if="${!page.last}"
            th:href="${baseUrl + '?page=' + (page.number + 1)}"
            class="page-btn" title="Next">›</a>
         <span th:if="${page.last}" class="page-btn disabled">›</span>
     </div>
-    <!-- Page info -->
+    <!-- Texto informativo: "Page X of Y" -->
     <p class="pagination-info" th:if="${page.totalPages > 1}"
        th:text="'Page ' + (${page.number + 1}) + ' of ' + ${page.totalPages}"></p>
 </div>

@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- Página: formulario para editar un comentario existente -->
+<!-- URL: GET /commenti/{id}/modifica -->
+<!-- Solo accesible por el autor del comentario (CommentoController verifica con findByIdAndUtente) -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Edit Comment')}"></head>
 <body>
@@ -6,24 +9,37 @@
 
 <div class="page-wrapper" style="max-width:600px">
     <div class="form-card">
+        <!-- Migas de pan: Tournaments › Match › Edit Comment -->
         <nav class="breadcrumb" style="margin-bottom:20px">
             <a th:href="@{/tornei}">Tournaments</a>
             <span>›</span>
+            <!-- Enlace al partido al que pertenece el comentario -->
+            <!-- commento.partita: accede a la relación @ManyToOne del comentario con el partido -->
             <a th:href="@{/partite/{id}(id=${commento.partita.id})}">Match</a>
             <span>›</span>
             <span>Edit Comment</span>
         </nav>
         <h2>Edit Comment</h2>
 
+        <!--
+            POST /commenti/{id}/modifica → CommentoController.modificaSalva()
+            El controller verifica que el comentario pertenece al usuario actual antes de guardar.
+            Si alguien intenta editar un comentario ajeno directamente, recibe un error.
+        -->
         <form th:action="@{/commenti/{id}/modifica(id=${commento.id})}" method="post">
             <div class="form-group">
                 <label>Your comment</label>
+                <!-- name="testo": @RequestParam String testo en el controller -->
+                <!-- th:text="${commento.testo}": pre-rellena el textarea con el texto actual del comentario -->
+                <!-- En Thymeleaf los <textarea> usan th:text en lugar de th:value -->
                 <textarea name="testo" rows="5" required
                           th:text="${commento.testo}"
                           placeholder="Write your comment..."></textarea>
             </div>
             <div class="form-actions">
+                <!-- Cancelar: vuelve al partido sin guardar -->
                 <a th:href="@{/partite/{id}(id=${commento.partita.id})}" class="btn btn-ghost">Cancel</a>
+                <!-- Guardar: actualiza el texto del comentario en BD -->
                 <button type="submit" class="btn btn-primary">Update Comment</button>
             </div>
         </form>

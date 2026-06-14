@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- Página: formulario para crear o editar un árbitro (solo ADMIN) -->
+<!-- URL crear: GET /admin/arbitri/nuovo  |  URL editar: GET /admin/arbitri/{id}/modifica -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Referee')}"></head>
 <body>
@@ -6,20 +8,33 @@
 
 <div class="page-wrapper">
     <div class="form-card">
+        <!-- Migas de pan: Referees › "Edit Referee" o "New Referee" -->
         <nav class="breadcrumb" style="margin-bottom:20px">
             <a th:href="@{/admin/arbitri}">Referees</a>
             <span>›</span>
+            <!-- Ternario: si el árbitro ya existe (tiene id) → edición, si no → creación -->
             <span th:text="${arbitro.id != null} ? 'Edit Referee' : 'New Referee'"></span>
         </nav>
         <h2 th:text="${arbitro.id != null} ? 'Edit Referee' : 'New Referee'"></h2>
 
+        <!--
+            th:action dinámica:
+            - Si arbitro.id existe → POST /admin/arbitri/{id}/modifica (actualiza árbitro existente)
+            - Si arbitro.id es null → POST /admin/arbitri/nuevo (crea árbitro nuevo)
+
+            th:object="${arbitro}": vincula el formulario al objeto Arbitro del modelo
+            Permite usar *{campo} en lugar de ${arbitro.campo} dentro del formulario
+        -->
         <form th:action="${arbitro.id != null} ? @{/admin/arbitri/{id}/modifica(id=${arbitro.id})} : @{/admin/arbitri/nuovo}"
               th:object="${arbitro}" method="post">
 
+            <!-- Nombre y apellido en dos columnas -->
             <div class="form-row">
                 <div class="form-group">
                     <label>First Name *</label>
+                    <!-- th:field="*{nome}": vincula al campo Arbitro.nome (@NotBlank) -->
                     <input type="text" th:field="*{nome}" required placeholder="e.g. Luca"/>
+                    <!-- Mensaje de error si la validación @NotBlank falla -->
                     <span class="error-msg" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
                 </div>
                 <div class="form-group">
@@ -29,6 +44,8 @@
                 </div>
             </div>
 
+            <!-- Código arbitral: identificador único del árbitro (ej: "ARB-001") -->
+            <!-- El repositorio tiene findByCodiceArbitrale() para buscar por este campo -->
             <div class="form-group">
                 <label>Referee Code *</label>
                 <input type="text" th:field="*{codiceArbitrale}" required placeholder="e.g. ARB-001"/>
@@ -36,6 +53,7 @@
                       th:errors="*{codiceArbitrale}"></span>
             </div>
 
+            <!-- Botones: Cancelar (vuelve a la lista) y Guardar -->
             <div class="form-actions">
                 <a th:href="@{/admin/arbitri}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save Referee</button>

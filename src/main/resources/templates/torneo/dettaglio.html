@@ -1,16 +1,23 @@
 <!DOCTYPE html>
+<!-- Página: detalle de un torneo — equipos participantes, resultados y próximos partidos -->
+<!-- URL pública: GET /tornei/{id}  |  URL admin: GET /admin/tornei/{id} -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Título dinámico: usa el nombre del torneo como título de la pestaña -->
 <head th:replace="~{fragments/layout :: head(${torneo.nome})}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
+<!-- Cabecera de la página con fondo decorativo y migas de pan (breadcrumb) -->
 <div class="detail-hero">
     <svg class="stripe-svg" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="0,220 500,0 1440,0 1440,220" fill="rgba(43,183,168,.07)"/>
         <polygon points="0,220 900,80 1440,150 1440,220" fill="rgba(43,183,168,.04)"/>
     </svg>
     <div class="inner">
+        <!-- Migas de pan: Tournaments › Nombre del torneo -->
+        <!-- El enlace "Tournaments" cambia según el rol del usuario -->
         <nav class="breadcrumb">
             <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei}">Tournaments</a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei}">Tournaments</a>
@@ -19,11 +26,14 @@
         </nav>
         <div class="page-header" style="margin-bottom:0">
             <div class="page-header-left">
+                <!-- Muestra la temporada y el nombre del torneo -->
                 <span class="eyebrow" th:text="'Season ' + ${torneo.anno}"></span>
                 <h1 class="page-title" th:text="${torneo.nome}"></h1>
+                <!-- Descripción del torneo: solo se muestra si existe (th:if) -->
                 <p style="color:var(--muted);font-size:14px;margin-top:8px;max-width:600px"
                    th:if="${torneo.descrizione}" th:text="${torneo.descrizione}"></p>
             </div>
+            <!-- Botones de editar y añadir partido: solo para ADMIN -->
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"
                  sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/admin/tornei/{id}/modifica(id=${torneo.id})}" class="btn btn-ghost btn-sm">Edit</a>
@@ -35,22 +45,29 @@
 
 <div class="page-wrapper">
 
+    <!-- Sección: Equipos participantes en el torneo -->
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">Participating Teams</h2>
+            <!-- #lists.size(): cuenta cuántos equipos hay en la lista -->
             <span class="badge badge-teal" th:text="${#lists.size(torneo.squadre)} + ' teams'"></span>
         </div>
+        <!-- Estado vacío si no hay equipos -->
         <div th:if="${#lists.isEmpty(torneo.squadre)}" class="empty-state" style="padding:32px 0">
             <p>No teams registered in this tournament.</p>
         </div>
+        <!-- Lista de etiquetas (tags) con los nombres de los equipos -->
+        <!-- th:unless: lo contrario de th:if — se muestra si la lista NO está vacía -->
         <div class="tag-list" th:unless="${#lists.isEmpty(torneo.squadre)}">
+            <!-- th:each: crea un <span> por cada equipo en torneo.squadre -->
             <span class="tag" th:each="s : ${torneo.squadre}" th:text="${s.nome}"></span>
         </div>
     </div>
 
-    <!-- ── Standings card ────────────────────────────────────── -->
+    <!-- Tarjeta de enlace a la clasificación — lleva a /tornei/{id}/classifica -->
+    <!-- React renderiza la tabla de clasificación en esa página -->
     <a class="standings-card" th:href="@{/tornei/{id}/classifica(id=${torneo.id})}">
-        <!-- decorative diagonal stripes left panel -->
+        <!-- Rayas decorativas del panel izquierdo -->
         <div class="sc-stripes">
             <svg width="100" height="100" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <line x1="-10" y1="110" x2="110" y2="-10" stroke="rgba(63,209,192,.18)" stroke-width="12"/>
@@ -58,19 +75,17 @@
                 <line x1="-30" y1="110" x2="90"  y2="-10" stroke="rgba(63,209,192,.08)" stroke-width="6"/>
             </svg>
         </div>
-        <!-- podium medals -->
+        <!-- Podio visual (1º, 2º, 3º) -->
         <div class="sc-podium">
             <div class="sc-pos sc-p2">2</div>
             <div class="sc-pos sc-p1">1</div>
             <div class="sc-pos sc-p3">3</div>
         </div>
-        <!-- text -->
         <div class="sc-body">
             <span class="sc-eyebrow">⚡ Live Rankings</span>
             <span class="sc-title">Full Standings</span>
             <span class="sc-sub">Points · Wins · Goals · Goal diff</span>
         </div>
-        <!-- arrow -->
         <div class="sc-arrow">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                 <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2"
@@ -79,9 +94,10 @@
         </div>
     </a>
 
-    <!-- ── Results banner ───────────────────────────────────── -->
+    <!-- Sección: Resultados de partidos jugados (estado PLAYED) -->
+    <!-- th:if: solo se muestra si hay partidos jugados en la lista 'risultati' -->
+    <!-- El controller filtra los partidos con PLAYED y los pone en 'risultati' -->
     <div class="results-card" th:if="${!#lists.isEmpty(risultati)}">
-        <!-- header row (same visual grammar as standings-card) -->
         <div class="rc-header">
             <div class="rc-stripes">
                 <svg width="100" height="100" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -98,24 +114,28 @@
             <div class="sc-body">
                 <span class="sc-eyebrow" style="color:#fbbf24">🏁 Played Matches</span>
                 <span class="sc-title">Results</span>
+                <!-- Muestra cuántos partidos jugados hay -->
                 <span class="sc-sub" th:text="${#lists.size(risultati)} + ' matches played'"></span>
             </div>
             <div class="rc-count-chip"
                  th:text="${#lists.size(risultati)} + ' PLAYED'"></div>
         </div>
-        <!-- divider -->
         <div class="rc-divider"></div>
-        <!-- rows -->
+        <!-- Tabla de resultados: una fila por partido jugado -->
         <table class="rc-table">
             <tbody>
+                <!-- th:each="p : ${risultati}": itera los partidos jugados -->
                 <tr th:each="p : ${risultati}">
+                    <!-- #temporals.format: formatea LocalDateTime como "dd/MM/yyyy" -->
                     <td class="rc-date"
                         th:text="${#temporals.format(p.dataOra, 'dd/MM/yyyy')}"></td>
                     <td class="rc-team rc-home" th:text="${p.squadraHome.nome}"></td>
+                    <!-- Resultado: goalsHome — goalsAway (ej: "2 — 1") -->
                     <td class="rc-score"
                         th:text="${p.goalsHome} + ' — ' + ${p.goalsAway}"></td>
                     <td class="rc-team rc-away" th:text="${p.squadraAway.nome}"></td>
                     <td class="rc-action">
+                        <!-- Enlace al detalle del partido con comentarios -->
                         <a th:href="@{/partite/{id}(id=${p.id})}" class="rc-link-btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor"
@@ -128,16 +148,19 @@
         </table>
     </div>
 
-    <!-- ── Upcoming Matches (scheduled) ──────────────────────── -->
+    <!-- Sección: Próximos partidos (estado SCHEDULED) -->
+    <!-- 'prossimePartite' viene del controller: lista de partidos con estado SCHEDULED -->
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">Upcoming Matches</h2>
             <span class="badge badge-teal" th:text="${#lists.size(prossimePartite)} + ' matches'"></span>
         </div>
+        <!-- Estado vacío si no hay partidos programados -->
         <div th:if="${#lists.isEmpty(prossimePartite)}" class="empty-state" style="padding:40px 0">
             <div class="empty-icon">📅</div>
             <p>No upcoming matches scheduled.</p>
         </div>
+        <!-- Tabla de próximos partidos -->
         <div class="table-wrap" th:unless="${#lists.isEmpty(prossimePartite)}">
             <table class="table">
                 <thead>
@@ -151,7 +174,9 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Una fila por cada partido programado -->
                     <tr th:each="p : ${prossimePartite}">
+                        <!-- Formatea fecha y hora con #temporals.format -->
                         <td th:text="${#temporals.format(p.dataOra, 'dd/MM/yyyy HH:mm')}"></td>
                         <td th:text="${p.squadraHome.nome}"></td>
                         <td th:text="${p.squadraAway.nome}"></td>
@@ -160,10 +185,14 @@
                             <span class="badge badge-teal">SCHEDULED</span>
                         </td>
                         <td style="white-space:nowrap">
+                            <!-- Enlace al detalle del partido (para todos) -->
                             <a th:href="@{/partite/{id}(id=${p.id})}" class="btn btn-ghost btn-sm">Details</a>
+                            <!-- Botones Score y Delete: solo para ADMIN -->
                             <span sec:authorize="hasRole('ADMIN')">
+                                <!-- Score: para introducir el resultado del partido -->
                                 <a th:href="@{/admin/partite/{id}/risultato(id=${p.id})}"
                                    class="btn btn-primary btn-sm">Score</a>
+                                <!-- Delete: elimina el partido con confirmación -->
                                 <form th:action="@{/admin/partite/{id}/elimina(id=${p.id})}" method="post"
                                       style="display:inline" onsubmit="return confirm('Delete this match?')">
                                     <button type="submit" class="btn btn-danger btn-sm">✕</button>

@@ -1,44 +1,69 @@
 <!DOCTYPE html>
+<!-- Archivo de fragmentos reutilizables: head, navbar y footer -->
+<!-- Thymeleaf los importa con th:replace="~{fragments/layout :: nombreFragmento}" -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- th:fragment="head(title)": este bloque se inserta como <head> en todas las páginas -->
+<!-- El parámetro 'title' cambia el título de la pestaña del navegador según la página -->
 <head th:fragment="head(title)">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- th:text: combina el título de la página con el nombre de la app -->
     <title th:text="${title} + ' | Football Tournaments'">Football Tournaments</title>
+
+    <!-- Favicon: carga la imagen del logo como icono de la pestaña del navegador -->
     <link rel="icon" id="favicon" type="image/png" th:href="@{/images/logo.jpeg}"/>
+
+    <!-- Script de favicon circular: recorta la imagen en un círculo con <canvas> -->
+    <!-- Se ejecuta al cargar la página para que el icono tenga forma redonda -->
     <script th:inline="javascript">
     (function(){
         const img = new Image();
+        // th:inline="javascript": Thymeleaf reemplaza la URL con la ruta real del servidor
         img.src = /*[[@{/images/logo.jpeg}]]*/ '/images/logo.jpeg';
         img.onload = function() {
+            // Crea un canvas 64x64 para dibujar el círculo recortado
             const c = document.createElement('canvas');
             c.width = c.height = 64;
             const ctx = c.getContext('2d');
             ctx.beginPath();
-            ctx.arc(32, 32, 32, 0, Math.PI * 2);
+            ctx.arc(32, 32, 32, 0, Math.PI * 2); // dibuja un círculo
             ctx.closePath();
-            ctx.clip();
-            ctx.drawImage(img, 0, 0, 64, 64);
+            ctx.clip(); // recorta todo lo que esté fuera del círculo
+            ctx.drawImage(img, 0, 0, 64, 64); // dibuja la imagen dentro del círculo
+            // Sustituye el favicon con la imagen recortada en base64
             document.getElementById('favicon').href = c.toDataURL('image/png');
         };
     })();
     </script>
+
+    <!-- Hoja de estilos principal de la aplicación -->
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+    <!-- Script que marca como "activo" el enlace de la barra de navegación -->
+    <!-- Lee la URL actual y añade la clase 'active' al enlace que coincide -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var p = window.location.pathname;
+      var p = window.location.pathname; // ruta actual, ej: /tornei
       document.querySelectorAll('.nav-links a[href]').forEach(function(a) {
         if (p.startsWith(a.getAttribute('href'))) a.classList.add('active');
       });
     });
     </script>
+
+    <!-- Flatpickr: librería de selector de fecha y hora (calendario visual) -->
+    <!-- Se usa en los formularios de partida y jugador para elegir fechas fácilmente -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"/>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
 
+<!-- th:fragment="navbar": barra de navegación insertada en todas las páginas -->
+<!-- sec:authorize: muestra u oculta elementos según el rol del usuario -->
 <nav th:fragment="navbar">
     <div class="navbar">
+        <!-- Logo — enlaza a la lista de torneos -->
         <a class="logo" th:href="@{/tornei}">
             <img th:src="@{/images/logo.jpeg}" alt="Football Tournaments" class="logo-img"/>
             <div class="logo-text">
@@ -47,27 +72,35 @@
             </div>
         </a>
         <ul class="nav-links">
+            <!-- Torneos: URL diferente según sea USER o ADMIN -->
             <li sec:authorize="!hasRole('ADMIN')"><a th:href="@{/tornei}">Tournaments</a></li>
             <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/tornei}">Tournaments</a></li>
+            <!-- Equipos: URL diferente según sea USER o ADMIN -->
             <li sec:authorize="!hasRole('ADMIN')"><a th:href="@{/squadre}">Teams</a></li>
             <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/squadre}">Teams</a></li>
+            <!-- Árbitros: solo visible para ADMIN -->
             <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/arbitri}">Referees</a></li>
+            <!-- Logout: solo visible si el usuario ha iniciado sesión -->
+            <!-- sec:authentication="name": muestra el nombre del usuario actual -->
             <li sec:authorize="isAuthenticated()">
                 <a th:href="@{/logout}" class="btn-link">
                     Logout (<span sec:authentication="name"></span>)
                 </a>
             </li>
+            <!-- Login y Sign Up: solo visibles si NO ha iniciado sesión -->
             <li sec:authorize="!isAuthenticated()"><a th:href="@{/login(show=true)}">Login</a></li>
             <li sec:authorize="!isAuthenticated()">
                 <a th:href="@{/register}" class="btn btn-primary btn-sm">Sign Up</a>
             </li>
         </ul>
     </div>
+    <!-- Barra naranja de "Admin Mode": solo visible para ADMIN como aviso visual -->
     <div class="admin-mode-bar" sec:authorize="hasRole('ADMIN')">
         <span>⚙ Admin Mode</span>
     </div>
 </nav>
 
+<!-- th:fragment="footer": pie de página insertado en todas las páginas -->
 <footer th:fragment="footer">
     <div class="footer" style="justify-content:center;text-align:center">
         <span>Sistemi Informativi Su Web &copy; 2026</span>

@@ -1,45 +1,54 @@
 <!DOCTYPE html>
+<!-- Página: landing page — página de inicio de la aplicación -->
+<!-- URL: GET /  (HomeController redirige a /tornei, pero esta página se muestra en la raíz) -->
+<!-- NO usa th:replace para layout.html — tiene su propio diseño completo independiente -->
+<!-- Es la única página que no tiene la barra de navegación estándar (tiene su propia cabecera) -->
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Football Tournaments</title>
+  <!-- Fuentes de Google: Bebas Neue (títulos grandes) y Manrope (texto general) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Hoja de estilos principal de la aplicación -->
   <link rel="stylesheet" th:href="@{/css/style.css}"/>
   <style>
-    /* ── Landing-specific overrides ── */
+    /* ── Estilos específicos de la landing page ── */
+    /* El body ocupa toda la pantalla con fondo teal (verde-azulado) */
     body { background: var(--teal); display:flex; flex-direction:column; min-height:100vh; padding:0; }
+    /* Contenedor que centra la tarjeta principal en la pantalla */
     .landing-wrap {
       flex:1; display:flex; align-items:center; justify-content:center;
       padding: 24px;
     }
+    /* Tarjeta principal: formato 16:9, dos columnas (futbolista a la izq, contenido a la dcha) */
     .card {
-      width: min(1280px,100%);
-      aspect-ratio: 16/9.2;
+      width: min(1280px,100%);   /* máximo 1280px de ancho */
+      aspect-ratio: 16/9.2;     /* proporción similar a pantalla de cine */
       min-height: 680px;
       background: var(--ink);
       border-radius: 18px;
       position: relative; overflow: hidden;
       box-shadow: 0 40px 80px -30px rgba(0,0,0,.45), 0 8px 20px -10px rgba(0,0,0,.3);
-      display: grid; grid-template-columns: 1fr 1.1fr;
+      display: grid; grid-template-columns: 1fr 1.1fr; /* col izq más estrecha que la dcha */
     }
-    /* stripes */
+    /* Rayas diagonales decorativas de fondo */
     .stripes { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
     .stripes svg { position:absolute; inset:0; width:100%; height:100%; }
-    /* dots */
+    /* Puntos decorativos distribuidos en el fondo */
     .dots { position:absolute; display:grid; grid-template-columns:repeat(6,6px); gap:8px; }
     .dots span { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.55); }
     .dots.muted span { background:rgba(255,255,255,.35) }
     .dots.bl { left:38%; bottom:32%; }
     .dots.br { right:18%; bottom:80px; }
     .dots.tl { left:28%; top:22%; opacity:.4; }
-    /* ring */
+    /* Anillos decorativos circulares */
     .ring { position:absolute; width:18px; height:18px; border:2px solid rgba(255,255,255,.55); border-radius:50%; }
     .ring.r1 { left:46%; top:14%; } .ring.r3 { left:33%; top:42%; width:10px; height:10px; opacity:.5; }
-    /* header */
+    /* Cabecera con logo y navegación superpuesta sobre la tarjeta */
     .lnd-header {
       position:absolute; top:0; left:0; right:0; padding:26px 44px;
       display:flex; align-items:center; justify-content:space-between; z-index:5;
@@ -53,16 +62,17 @@
     nav.lnd-nav a { color:#D6DCE3; text-decoration:none; font-weight:600; font-size:13px; letter-spacing:.12em; text-transform:uppercase; transition:color .2s; }
     nav.lnd-nav a:hover { color:#fff; }
     nav.lnd-nav a.active { color:#3FD1C0; }
-    /* stage left */
+    /* Columna izquierda: área del futbolista animado */
     .stage { position:relative; grid-column:1; overflow:visible; }
+    /* Sombra del suelo bajo el futbolista */
     .ground-shadow { position:absolute; left:14%; right:18%; bottom:60px; height:22px; border-radius:50%; background:radial-gradient(ellipse at center,rgba(0,0,0,.55),rgba(0,0,0,0) 70%); filter:blur(2px); z-index:1; }
-    /* player */
+    /* Contenedor del SVG del futbolista animado */
     .player-wrap { position:absolute; left:50%; top:54%; transform:translate(-50%,-50%); width:520px; height:620px; z-index:3; }
     .player-wrap svg { width:100%; height:100%; overflow:visible; }
-    /* ball */
+    /* Balón animado (se mueve independientemente del cuerpo) */
     .ball-wrap { position:absolute; left:0; top:0; width:74px; height:74px; z-index:4; }
     .ball-wrap svg { width:100%; height:100%; transform-origin:center; }
-    /* rigging */
+    /* Animaciones CSS del futbolista — cada parte del cuerpo tiene su propia animación */
     .player-body { transform-origin:260px 380px; animation:bodyLean 3.2s cubic-bezier(.45,.05,.4,1) infinite; }
     .standing-leg { transform-origin:290px 372px; animation:standLeg 3.2s cubic-bezier(.45,.05,.4,1) infinite; }
     .leg-kick { transform-origin:235px 372px; animation:thighSwing 3.2s cubic-bezier(.45,.05,.4,1) infinite; }
@@ -72,6 +82,7 @@
     .hair-bounce { transform-origin:260px 175px; animation:hairBounce 3.2s cubic-bezier(.45,.05,.4,1) infinite; }
     .swoosh { transform-origin:285px 372px; opacity:0; animation:swooshFlash 3.2s ease-out infinite; }
     .dust { position:absolute; left:44%; top:82%; width:120px; height:40px; pointer-events:none; z-index:2; opacity:0; animation:dustPuff 3.2s ease-out infinite; }
+    /* Keyframes de cada animación del futbolista */
     @keyframes thighSwing{0%{transform:rotate(-5deg)}12%{transform:rotate(-15deg)}32%{transform:rotate(45deg)}44%{transform:rotate(-35deg)}52%{transform:rotate(-60deg)}70%{transform:rotate(-20deg)}100%{transform:rotate(-5deg)}}
     @keyframes shinSnap{0%{transform:rotate(0deg)}12%{transform:rotate(5deg)}32%{transform:rotate(80deg)}40%{transform:rotate(35deg)}44%{transform:rotate(-5deg)}52%{transform:rotate(-15deg)}70%{transform:rotate(10deg)}100%{transform:rotate(0deg)}}
     @keyframes bodyLean{0%{transform:rotate(1deg) translateY(0)}32%{transform:rotate(6deg) translateY(-2px)}44%{transform:rotate(-5deg) translateY(-5px)}52%{transform:rotate(-7deg) translateY(-3px)}100%{transform:rotate(1deg) translateY(0)}}
@@ -79,15 +90,18 @@
     @keyframes armSwingL{0%{transform:rotate(5deg)}32%{transform:rotate(-35deg)}44%{transform:rotate(40deg)}100%{transform:rotate(5deg)}}
     @keyframes armSwingR{0%{transform:rotate(-5deg)}32%{transform:rotate(35deg)}44%{transform:rotate(-30deg)}100%{transform:rotate(-5deg)}}
     @keyframes hairBounce{0%,100%{transform:translateY(0) rotate(0deg)}32%{transform:translateY(-3px) rotate(-3deg)}44%{transform:translateY(2px) rotate(2deg)}}
+    /* Animación del balón: sigue una trayectoria parabólica de izquierda a derecha */
     @keyframes ballPath{0%,30%{left:45%;top:80%;transform:scale(1) rotate(0deg);opacity:1}42%{left:47%;top:79%;transform:scale(1.18,.82) rotate(0deg)}44%{left:50%;top:75%;transform:scale(.95) rotate(0deg)}55%{left:72%;top:30%;transform:scale(.85)}65%{left:92%;top:60%;transform:scale(.78)}66%{left:95%;top:65%;opacity:0;transform:scale(.78)}74%{left:-8%;top:80%;opacity:0;transform:scale(.95)}76%{left:0%;top:80%;opacity:1}100%{left:45%;top:80%;transform:scale(1);opacity:1}}
     @keyframes ballSpin{0%{transform:rotate(0deg)}44%{transform:rotate(140deg)}100%{transform:rotate(900deg)}}
     @keyframes swooshFlash{0%,38%{opacity:0}42%{opacity:.55}50%{opacity:0}100%{opacity:0}}
     @keyframes dustPuff{0%,40%{opacity:0;transform:translateX(0) scale(.6)}44%{opacity:.7;transform:translateX(8px) scale(.9)}55%{opacity:0;transform:translateX(40px) scale(1.6)}100%{opacity:0;transform:translateX(0) scale(.6)}}
+    /* Aplica la animación al wrapper del balón (trayectoria) y al SVG interior (rotación) */
     .ball-wrap { animation:ballPath 3.2s cubic-bezier(.4,.0,.5,1) infinite !important; }
     .ball-wrap svg { animation:ballSpin 3.2s linear infinite !important; }
-    /* right content */
+    /* Columna derecha: texto, botones y estadísticas */
     .content { grid-column:2; position:relative; z-index:2; padding:120px 50px 60px 10px; display:flex; flex-direction:column; justify-content:center; align-items:flex-end; text-align:right; }
     .eyebrow-lnd { color:#3FD1C0; letter-spacing:.32em; font-size:12px; font-weight:700; margin-bottom:14px; text-transform:uppercase; }
+    /* Título principal en Bebas Neue con tamaño fluido (clamp) */
     h1.title { font-family:'Bebas Neue',sans-serif; font-size:clamp(64px,7vw,112px); line-height:.88; letter-spacing:.01em; color:#fff; text-shadow:0 4px 0 rgba(0,0,0,.18); white-space:nowrap; }
     h2.sub { font-family:'Bebas Neue',sans-serif; color:#3FD1C0; font-size:clamp(28px,3vw,44px); letter-spacing:.18em; margin-top:6px; }
     .blurb { color:#B7BFC8; font-size:14px; line-height:1.65; max-width:380px; margin-top:22px; }
@@ -96,13 +110,14 @@
     .btn-lnd:hover { transform:translateY(-1px); box-shadow:0 16px 28px -10px rgba(63,209,192,.7); color:#fff; }
     .btn-ghost-lnd { background:transparent; border:1.5px solid #3A434E; color:#D6DCE3; padding:13px 22px; border-radius:999px; font:inherit; font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:border-color .2s; text-decoration:none; display:inline-block; }
     .btn-ghost-lnd:hover { border-color:#3FD1C0; color:#fff; }
+    /* Estadísticas: equipos, ligas, partidos */
     .stats { margin-top:34px; display:flex; gap:36px; }
     .stat .n { font-family:'Bebas Neue',sans-serif; font-size:34px; color:#fff; line-height:1; }
     .stat .n em { color:#3FD1C0; font-style:normal; }
     .stat .l { margin-top:4px; color:#8B939D; font-size:11px; letter-spacing:.2em; text-transform:uppercase; }
-    /* ribbon */
+    /* Cinta lateral "SEASON · 2026" */
     .ribbon { position:absolute; left:0; top:30%; background:#1F8C80; color:#fff; font-weight:800; letter-spacing:.3em; font-size:11px; padding:8px 14px 8px 18px; border-radius:0 6px 6px 0; z-index:6; }
-    /* auth nav buttons */
+    /* Botones de autenticación en la cabecera */
     .nav-auth { display:flex; align-items:center; gap:10px; }
     .nav-auth a { color:#D6DCE3; text-decoration:none; font-weight:600; font-size:12px; letter-spacing:.12em; text-transform:uppercase; padding:7px 16px; border-radius:999px; transition:background .2s,color .2s; }
     .nav-auth a.register { background:linear-gradient(135deg,#3FD1C0,#1F8C80); color:#fff; }
@@ -110,6 +125,7 @@
     .nav-auth a.login:hover { border-color:#3FD1C0; color:#fff; }
     .nav-auth form button { background:none; border:1px solid #3A434E; color:#D6DCE3; font-family:inherit; font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:7px 16px; border-radius:999px; cursor:pointer; transition:border-color .2s,color .2s; }
     .nav-auth form button:hover { border-color:#3FD1C0; color:#fff; }
+    /* Responsive: en pantallas pequeñas pasa a una sola columna */
     @media(max-width:980px){.card{grid-template-columns:1fr;aspect-ratio:auto}.content{align-items:flex-start;text-align:left;padding:460px 30px 60px}.player-wrap{width:420px;height:500px;top:44%}nav.lnd-nav{display:none}.stats{flex-wrap:wrap}}
   </style>
 </head>
@@ -118,15 +134,17 @@
 <div class="landing-wrap">
 <div class="card">
 
-  <!-- Diagonal stripes -->
+  <!-- Rayas diagonales decorativas de fondo (SVG puro, no tiene contenido semántico) -->
   <div class="stripes" aria-hidden="true">
     <svg viewBox="0 0 1280 720" preserveAspectRatio="none">
       <defs>
         <linearGradient id="sG" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#2BB7A8" stop-opacity=".95"/><stop offset="1" stop-color="#1F8C80" stop-opacity=".25"/></linearGradient>
         <linearGradient id="sG2" x1="0" x2="1" y1="1" y2="0"><stop offset="0" stop-color="#3FD1C0" stop-opacity=".8"/><stop offset="1" stop-color="#1F8C80" stop-opacity=".1"/></linearGradient>
+        <!-- Patrón de puntos semitransparentes para el fondo derecho -->
         <pattern id="dg" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" fill="rgba(43,183,168,.18)"/></pattern>
       </defs>
       <rect x="720" y="0" width="560" height="720" fill="url(#dg)"/>
+      <!-- Polígonos que forman las rayas diagonales de color -->
       <polygon points="-40,720 240,720 460,0 180,0" fill="url(#sG)"/>
       <polygon points="120,720 320,720 540,0 340,0" fill="url(#sG2)" opacity=".55"/>
       <polygon points="-60,720 60,720 280,0 160,0" fill="#1F8C80" opacity=".35"/>
@@ -136,25 +154,32 @@
     </svg>
   </div>
 
-  <!-- Header -->
+  <!-- Cabecera: logo, navegación y botones de autenticación -->
   <header class="lnd-header">
     <a class="lnd-logo" th:href="@{/}">
+      <!-- Logo geométrico (hexágono) en SVG -->
       <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 8v8l10 6 10-6V8L12 2z" stroke="#0F2F2B" stroke-width="2" stroke-linejoin="round"/><path d="M12 7l-5 3v4l5 3 5-3v-4l-5-3z" fill="#0F2F2B"/></svg></div>
       <div><div class="lt1">FOOTBALL</div><div class="lt2">TOURNAMENTS</div></div>
     </a>
+    <!-- Navegación superior (oculta en móvil con @media) -->
     <nav class="lnd-nav">
       <a th:href="@{/}" class="active">Home</a>
       <a th:href="@{/tornei}">Tournaments</a>
       <a th:href="@{/squadre}">Teams</a>
       <a th:href="@{/tornei}">Schedule</a>
     </nav>
+    <!-- Botones de autenticación en la cabecera -->
     <div class="nav-auth">
+      <!-- Si el usuario está autenticado: muestra su nombre y botón "Sign Out" -->
+      <!-- sec:authorize="isAuthenticated()": solo visible cuando hay sesión activa -->
       <sec:authorize access="isAuthenticated()">
         <span style="color:#D6DCE3;font-size:12px;letter-spacing:.1em;" sec:authentication="name"></span>
+        <!-- Formulario POST para cerrar sesión (usa nuestro GET /logout personalizado) -->
         <form th:action="@{/logout}" method="post" style="display:inline">
           <button type="submit">Sign Out</button>
         </form>
       </sec:authorize>
+      <!-- Si el usuario NO está autenticado: muestra "Sign In" y "Sign Up" -->
       <sec:authorize access="!isAuthenticated()">
         <a th:href="@{/login}" class="login">Sign In</a>
         <a th:href="@{/register}" class="register">Sign Up</a>
@@ -162,14 +187,17 @@
     </div>
   </header>
 
-  <!-- Ribbon -->
+  <!-- Cinta lateral decorativa con la temporada -->
   <div class="ribbon">SEASON · 2026</div>
 
-  <!-- Left stage (footballer) -->
+  <!-- Columna izquierda: futbolista animado con balón -->
   <div class="stage">
+    <!-- Puntos decorativos en la esquina superior izquierda -->
     <div class="dots tl"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <div class="ring r1"></div><div class="ring r3"></div>
+    <!-- Sombra elíptica bajo el futbolista para simular el suelo -->
     <div class="ground-shadow"></div>
+    <!-- Nube de polvo al chutar (animada con CSS) -->
     <svg class="dust" viewBox="0 0 120 40" aria-hidden="true">
       <ellipse cx="20" cy="28" rx="14" ry="4" fill="#fff" opacity=".55"/>
       <ellipse cx="42" cy="22" rx="10" ry="3" fill="#fff" opacity=".45"/>
@@ -177,9 +205,12 @@
       <ellipse cx="82" cy="24" rx="8" ry="2.5" fill="#fff" opacity=".35"/>
       <ellipse cx="100" cy="30" rx="10" ry="3" fill="#fff" opacity=".3"/>
     </svg>
+    <!-- SVG del futbolista: todas las partes del cuerpo tienen clase CSS con animación -->
+    <!-- Cada <g> con clase (player-body, standing-leg, etc.) se mueve independientemente -->
     <div class="player-wrap" aria-label="Footballer animado">
       <svg viewBox="0 0 520 620" xmlns="http://www.w3.org/2000/svg" overflow="visible">
         <defs>
+          <!-- Gradientes de colores para la equipación y la piel del futbolista -->
           <linearGradient id="jersey" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E84F3F"/><stop offset="1" stop-color="#B22A1F"/></linearGradient>
           <linearGradient id="jerseyHi" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF7867" stop-opacity=".7"/><stop offset="1" stop-color="#FF7867" stop-opacity="0"/></linearGradient>
           <linearGradient id="shorts" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#C8311F"/><stop offset="1" stop-color="#8A1B11"/></linearGradient>
@@ -187,7 +218,9 @@
           <linearGradient id="sock" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FAFAFA"/><stop offset="1" stop-color="#C8C8C8"/></linearGradient>
           <radialGradient id="headShade" cx="50%" cy="40%" r="55%"><stop offset="0" stop-color="#F8D2B5"/><stop offset="1" stop-color="#C99474"/></radialGradient>
         </defs>
+        <!-- Estela de movimiento al chutar (aparece brevemente durante la patada) -->
         <g class="swoosh"><path d="M280 360 Q 180 320 80 380" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" opacity=".55"/><path d="M270 380 Q 180 350 100 400" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".35"/></g>
+        <!-- Pierna de apoyo (la que está en el suelo) -->
         <g class="standing-leg">
           <path d="M276 372 Q 272 420 278 488 L 308 488 Q 308 420 304 372 Z" fill="url(#shorts)"/>
           <path d="M276 372 Q 272 420 278 488 L 286 488 Q 284 420 284 372 Z" fill="#000" fill-opacity=".18"/>
@@ -201,42 +234,56 @@
           <circle cx="298" cy="613" r="1.2" fill="#fff" opacity=".6"/>
           <circle cx="318" cy="612" r="1.2" fill="#fff" opacity=".6"/>
         </g>
+        <!-- Brazo derecho (oscila en dirección opuesta al brazo izquierdo) -->
         <g class="arm-right">
           <path d="M310 250 Q 332 254,348 278 Q 360 304,354 326 Q 350 336,338 332 Q 332 312,322 290 Q 314 270,304 258 Z" fill="url(#jersey)"/>
           <circle cx="346" cy="332" r="12" fill="url(#skin)"/>
         </g>
+        <!-- Cuerpo principal del futbolista (camiseta, cabeza, brazo izquierdo) -->
         <g class="player-body">
+          <!-- Camiseta roja con el número 10 -->
           <path d="M200 232 C 206 218,224 210,260 210 C 296 210,314 218,320 232 L 340 290 Q 348 332,338 382 L 182 382 Q 172 332,180 290 Z" fill="url(#jersey)"/>
           <path d="M218 238 Q 260 226 302 238 L 296 270 Q 260 258 224 270 Z" fill="url(#jerseyHi)"/>
           <line x1="260" y1="216" x2="260" y2="380" stroke="#000" stroke-opacity=".18" stroke-width="2"/>
           <path d="M182 376 Q 260 388 338 376 L 340 386 Q 260 396 180 386 Z" fill="#8A1B11"/>
+          <!-- Número 10 en la camiseta (fuente Bebas Neue) -->
           <text x="262" y="322" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="64" fill="#fff" fill-opacity=".95" stroke="#8A1B11" stroke-width="1.2">10</text>
+          <!-- Brazo izquierdo (dentro del grupo player-body para que se mueva con el cuerpo) -->
           <g class="arm-left">
             <path d="M215 248 Q 198 254,186 280 Q 174 312,180 338 Q 186 352,200 350 Q 204 326,210 306 Q 216 282,222 264 Z" fill="url(#jersey)"/>
             <circle cx="194" cy="350" r="12" fill="url(#skin)"/>
           </g>
+          <!-- Cuello -->
           <path d="M250 198 L 270 198 L 274 222 L 246 222 Z" fill="url(#skin)"/>
           <ellipse cx="260" cy="218" rx="16" ry="3.5" fill="#000" fill-opacity=".22"/>
+          <!-- Cabeza con gradiente radial para efecto 3D -->
           <ellipse cx="260" cy="174" rx="40" ry="44" fill="url(#headShade)"/>
           <ellipse cx="223" cy="180" rx="4.5" ry="8" fill="url(#skin)"/>
+          <!-- Cabello oscuro con animación independiente (hairBounce) -->
           <g class="hair-bounce">
             <path d="M220 168 Q 215 128,252 120 Q 275 116,295 124 Q 312 134,306 172 Q 298 160,288 158 Q 282 152,274 156 Q 266 162,258 158 Q 248 154,240 162 Q 230 168,220 168 Z" fill="#2C1810"/>
             <path d="M220 168 Q 214 178,218 192 Q 224 184,226 178 Z" fill="#2C1810"/>
           </g>
+          <!-- Ojos: blanco + iris oscuro + reflejo de luz -->
           <ellipse cx="248" cy="182" rx="3.2" ry="3.8" fill="#fff"/><ellipse cx="276" cy="182" rx="3.2" ry="3.8" fill="#fff"/>
           <circle cx="249" cy="184" r="2.2" fill="#1a1a1a"/><circle cx="277" cy="184" r="2.2" fill="#1a1a1a"/>
           <circle cx="250" cy="182" r=".7" fill="#fff"/><circle cx="278" cy="182" r=".7" fill="#fff"/>
+          <!-- Cejas -->
           <path d="M241 174 Q 249 170 257 174" stroke="#2C1810" stroke-width="2.8" stroke-linecap="round" fill="none"/>
           <path d="M269 174 Q 277 170 285 174" stroke="#2C1810" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+          <!-- Nariz y boca -->
           <path d="M262 188 Q 264 196 260 200" stroke="#B6856A" stroke-width="1.5" fill="none" opacity=".75"/>
           <path d="M252 208 Q 262 213 272 208" stroke="#6D2E1E" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <!-- Mejillas rosadas -->
           <ellipse cx="238" cy="196" rx="6" ry="3.5" fill="#E89A85" opacity=".55"/>
           <ellipse cx="284" cy="196" rx="6" ry="3.5" fill="#E89A85" opacity=".55"/>
         </g>
+        <!-- Pierna que chuta: muslo (leg-kick) + espinilla (shin-kick) animados por separado -->
         <g class="leg-kick">
           <path d="M220 372 Q 218 422 224 472 L 250 472 Q 252 422 250 372 Z" fill="url(#shorts)"/>
           <path d="M220 372 Q 218 422 224 472 L 232 472 Q 228 422 228 372 Z" fill="#000" fill-opacity=".2"/>
           <ellipse cx="237" cy="470" rx="14" ry="6" fill="#000" fill-opacity=".25"/>
+          <!-- Espinilla: se dobla independientemente del muslo para simular la rodilla -->
           <g class="shin-kick">
             <path d="M226 472 L 248 472 Q 246 510 244 540 L 228 540 Q 226 510 226 472 Z" fill="url(#skin)"/>
             <path d="M225 538 L 249 538 L 247 580 L 227 580 Z" fill="url(#sock)"/>
@@ -251,10 +298,12 @@
         </g>
       </svg>
     </div>
+    <!-- Balón de fútbol animado (se mueve por el aire con ballPath + gira con ballSpin) -->
     <div class="ball-wrap" aria-hidden="true">
       <svg viewBox="0 0 100 100">
         <defs><radialGradient id="ballg" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#D4D9DE"/></radialGradient></defs>
         <circle cx="50" cy="50" r="46" fill="url(#ballg)" stroke="#222" stroke-width="2"/>
+        <!-- Manchas del balón -->
         <polygon points="50,28 64,38 59,55 41,55 36,38" fill="#101418"/>
         <polygon points="28,52 38,46 46,56 40,68 30,66" fill="#101418" opacity=".85"/>
         <polygon points="72,52 62,46 54,56 60,68 70,66" fill="#101418" opacity=".85"/>
@@ -264,24 +313,42 @@
         <path d="M36 38 L 22 32" stroke="#101418" stroke-width="1.5"/>
       </svg>
     </div>
+    <!-- Puntos decorativos en la parte inferior izquierda -->
     <div class="dots bl"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
   </div>
 
-  <!-- Right content -->
+  <!-- Columna derecha: texto principal, botones CTA y estadísticas -->
   <div class="content">
     <div class="eyebrow-lnd">NATIONAL LEAGUE · SEASON 2026</div>
+    <!-- Título principal en dos líneas con Bebas Neue -->
     <h1 class="title">FOOTBALL</h1>
     <h2 class="sub">TOURNAMENTS &amp; LEAGUES</h2>
     <p class="blurb">Organise, play and live the passion of amateur football. Automatic schedules, live standings and everything your team needs to reach the final.</p>
+
+    <!-- Botones CTA (Call to Action) -->
     <div class="cta-row">
+      <!-- Sign Up: lleva al formulario de registro -->
       <a th:href="@{/register}" class="btn-lnd">Sign Up</a>
+      <!-- View Tournaments: lleva a la lista de torneos -->
       <a th:href="@{/tornei}" class="btn-ghost-lnd">View Tournaments</a>
     </div>
+
+    <!-- Estadísticas decorativas (números fijos, no vienen de la BD) -->
     <div class="stats">
-      <div class="stat"><div class="n"><em>+</em>240</div><div class="l">Teams</div></div>
-      <div class="stat"><div class="n">36</div><div class="l">Leagues</div></div>
-      <div class="stat"><div class="n"><em>+</em>1.8k</div><div class="l">Matches</div></div>
+      <div class="stat">
+        <div class="n"><em>+</em>240</div>
+        <div class="l">Teams</div>
+      </div>
+      <div class="stat">
+        <div class="n">36</div>
+        <div class="l">Leagues</div>
+      </div>
+      <div class="stat">
+        <div class="n"><em>+</em>1.8k</div>
+        <div class="l">Matches</div>
+      </div>
     </div>
+    <!-- Puntos decorativos en la esquina inferior derecha -->
     <div class="dots br muted"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
   </div>
 

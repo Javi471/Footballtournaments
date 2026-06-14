@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- Página: formulario para crear un nuevo partido (solo ADMIN) -->
+<!-- URL: GET /admin/partite/nuova -->
+<!-- Los selectores se rellenan con listas enviadas por el controller desde la BD -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('New Match')}"></head>
 <body>
@@ -6,6 +9,7 @@
 
 <div class="page-wrapper">
     <div class="form-card" style="max-width:760px">
+        <!-- Migas de pan: Tournaments › Register Match -->
         <nav class="breadcrumb" style="margin-bottom:20px">
             <a th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
@@ -13,27 +17,39 @@
         </nav>
         <h2>Register Match</h2>
 
+        <!-- POST /admin/partite/nuova: Spring recibe los IDs de los selectores como @RequestParam -->
+        <!-- NO usamos th:object aquí porque Partita tiene relaciones (@ManyToOne) que no se vinculan directamente -->
+        <!-- Los IDs (torneoId, squadraHomeId, etc.) llegan como parámetros separados al controller -->
         <form th:action="@{/admin/partite/nuova}" method="post">
 
+            <!-- Selector: Torneo al que pertenece el partido -->
+            <!-- name="torneoId": el controller recibe @RequestParam Long torneoId -->
             <div class="form-group">
                 <label>Tournament *</label>
                 <select name="torneoId" required>
                     <option value="">— Select Tournament —</option>
+                    <!-- th:each="t : ${tornei}": itera la lista de torneos enviada por el controller -->
+                    <!-- th:value="${t.id}": el valor del option es el ID del torneo -->
+                    <!-- th:text: muestra "Nombre (Año)" -->
                     <option th:each="t : ${tornei}" th:value="${t.id}"
                             th:text="${t.nome} + ' (' + ${t.anno} + ')'"></option>
                 </select>
             </div>
 
+            <!-- Selectores en dos columnas: equipo local y visitante -->
             <div class="form-row">
                 <div class="form-group">
                     <label>Home Team *</label>
+                    <!-- name="squadraHomeId": @RequestParam Long squadraHomeId en el controller -->
                     <select name="squadraHomeId" required>
                         <option value="">— Select —</option>
+                        <!-- th:each="s : ${squadre}": itera todos los equipos de la BD -->
                         <option th:each="s : ${squadre}" th:value="${s.id}" th:text="${s.nome}"></option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Away Team *</label>
+                    <!-- name="squadraAwayId": @RequestParam Long squadraAwayId en el controller -->
                     <select name="squadraAwayId" required>
                         <option value="">— Select —</option>
                         <option th:each="s : ${squadre}" th:value="${s.id}" th:text="${s.nome}"></option>
@@ -41,10 +57,13 @@
                 </div>
             </div>
 
+            <!-- Selector: Árbitro del partido -->
             <div class="form-group">
                 <label>Referee *</label>
+                <!-- name="arbitroId": @RequestParam Long arbitroId en el controller -->
                 <select name="arbitroId" required>
                     <option value="">— Select Referee —</option>
+                    <!-- Muestra "Nombre Apellido [CódigoArbitral]" -->
                     <option th:each="a : ${arbitri}" th:value="${a.id}"
                             th:text="${a.nome} + ' ' + ${a.cognome} + ' [' + ${a.codiceArbitrale} + ']'">
                     </option>
@@ -55,10 +74,13 @@
                 <div class="form-group">
                     <label>Date &amp; Time *</label>
                     <div style="position:relative">
+                        <!-- Input visible: el usuario elige con el calendario Flatpickr -->
+                        <!-- Flatpickr muestra una interfaz visual para seleccionar fecha y hora -->
                         <input type="text" id="dataOraPicker" required
                                placeholder="Select date &amp; time…"
                                style="cursor:pointer;padding-right:38px"/>
-                        <!-- hidden field Spring reads -->
+                        <!-- Campo oculto que Spring lee: name="dataOra" → @ModelAttribute convierte a LocalDateTime -->
+                        <!-- Flatpickr escribe la fecha en formato ISO (yyyy-MM-ddTHH:mm) en este campo -->
                         <input type="hidden" name="dataOra" id="dataOraHidden"/>
                         <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
                                      font-size:16px;pointer-events:none;color:var(--teal-soft)">📅</span>
@@ -66,6 +88,7 @@
                 </div>
                 <div class="form-group">
                     <label>Venue</label>
+                    <!-- name="luogo": campo del partido para el estadio/lugar -->
                     <input type="text" name="luogo" placeholder="e.g. Municipal Stadium"/>
                 </div>
             </div>
@@ -78,21 +101,24 @@
     </div>
 </div>
 
+<!-- Flatpickr: inicializa el selector de fecha y hora -->
 <script>
 flatpickr("#dataOraPicker", {
-    enableTime: true,
-    dateFormat: "d/m/Y H:i",
-    time_24hr: true,
-    minuteIncrement: 15,
-    disableMobile: true,
+    enableTime: true,          // permite elegir también la hora
+    dateFormat: "d/m/Y H:i",  // formato visual para el usuario (ej: 14/06/2026 18:00)
+    time_24hr: true,           // reloj en formato 24 horas
+    minuteIncrement: 15,       // los minutos van de 15 en 15
+    disableMobile: true,       // evita el selector nativo del móvil (usa siempre Flatpickr)
     onChange: function(selectedDates) {
         if (selectedDates.length > 0) {
             const d = selectedDates[0];
+            // Construye la fecha en formato ISO "yyyy-MM-ddTHH:mm" que Spring entiende
             const iso = d.getFullYear() + '-'
                 + String(d.getMonth()+1).padStart(2,'0') + '-'
                 + String(d.getDate()).padStart(2,'0') + 'T'
                 + String(d.getHours()).padStart(2,'0') + ':'
                 + String(d.getMinutes()).padStart(2,'0');
+            // Escribe el valor ISO en el campo oculto que Spring leerá al enviar el formulario
             document.getElementById('dataOraHidden').value = iso;
         }
     }

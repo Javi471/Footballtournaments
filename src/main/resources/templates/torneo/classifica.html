@@ -1,21 +1,28 @@
 <!DOCTYPE html>
+<!-- Página: clasificación del torneo — la tabla la renderiza React, no Thymeleaf -->
+<!-- URL pública: GET /tornei/{id}/classifica -->
+<!-- Flujo: Thymeleaf genera el HTML → React lee data-torneo-id → llama a /api/tornei/{id}/classifica → dibuja la tabla -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Título: "Standings — Nombre del torneo" -->
 <head th:replace="~{fragments/layout :: head('Standings — ' + ${torneo.nome})}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<!-- ── Hero ────────────────────────────────────────────────────────── -->
+<!-- Cabecera con fondo decorativo y migas de pan -->
 <div class="detail-hero">
     <svg class="stripe-svg" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polygon points="0,220 500,0 1440,0 1440,220" fill="rgba(43,183,168,.07)"/>
         <polygon points="0,220 900,80 1440,150 1440,220" fill="rgba(43,183,168,.04)"/>
     </svg>
     <div class="inner">
+        <!-- Migas de pan: Tournaments › Nombre torneo › Standings -->
         <nav class="breadcrumb">
             <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei}">Tournaments</a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei}">Tournaments</a>
             <span>›</span>
+            <!-- Enlace al detalle del torneo: URL diferente según el rol -->
             <a sec:authorize="!hasRole('ADMIN')" th:href="@{/tornei/{id}(id=${torneo.id})}" th:text="${torneo.nome}"></a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/tornei/{id}(id=${torneo.id})}" th:text="${torneo.nome}"></a>
             <span>›</span>
@@ -33,23 +40,34 @@
 
 <div class="page-wrapper">
 
-    <!-- ── Standings table (React) ──────────────────────────────────── -->
+    <!-- Sección donde React monta la tabla de clasificación -->
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">League Table</h2>
         </div>
 
         <!--
-            React monta la tabla de clasificacion dentro de este div.
-            data-torneo-id lo lee classifica.js para saber que torneo cargar.
-            classifica.js llama a /api/tornei/{id}/classifica y dibuja la tabla.
+            PUNTO CLAVE — INTEGRACIÓN REACT + THYMELEAF:
+
+            Este <div> es el "punto de montaje" de React.
+            - id="classifica-root": React busca este elemento con document.getElementById('classifica-root')
+            - th:attr="data-torneo-id=${torneo.id}": Thymeleaf escribe el ID del torneo como atributo HTML
+              → React lo lee con: document.getElementById('classifica-root').dataset.torneoId
+              → Luego llama a: fetch('/api/tornei/' + torneoId + '/classifica')
+              → La API devuelve JSON con la clasificación calculada por PartitaService.calcolaClassifica()
+              → React dibuja la tabla con los datos recibidos
         -->
         <div id="classifica-root" th:attr="data-torneo-id=${torneo.id}"></div>
     </div>
 
-    <!-- Script compilado de classifica.jsx por Vite — genera la tabla con React -->
+    <!--
+        Script compilado de React:
+        - classifica.jsx está en frontend/src/classifica.jsx
+        - Vite lo compila a src/main/resources/static/react/classifica.js
+        - th:src genera la URL correcta del servidor (ej: /react/classifica.js)
+        - El script crea el componente React y lo monta en #classifica-root
+    -->
     <script th:src="@{/react/classifica.js}"></script>
-
 
 </div>
 
