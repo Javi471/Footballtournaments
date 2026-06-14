@@ -7,17 +7,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 
-// @Component: le dice a Spring que cree este objeto automáticamente al arrancar
-// implements CommandLineRunner: Spring llama al método run() una vez que la app está lista
-// Su función: crear datos de prueba en la BD si no existen todavía
+// Carga datos de prueba en la base de datos la primera vez que arranca la app
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    // Spring inyecta todos los repositorios y el encriptador de contraseñas
     @Autowired private UserRepository       userRepository;
     @Autowired private TorneoRepository     torneoRepository;
     @Autowired private SquadraRepository    squadraRepository;
@@ -25,37 +21,32 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private ArbitroRepository    arbitroRepository;
     @Autowired private PartitaRepository    partitaRepository;
     @Autowired private CommentoRepository   commentoRepository;
-    @Autowired private PasswordEncoder      passwordEncoder; // para encriptar contraseñas
+    @Autowired private PasswordEncoder      passwordEncoder;
 
-    // Spring llama a este método automáticamente cuando la app termina de arrancar
     @Override
     public void run(String... args) {
 
-        // Crea los usuarios admin y user solo si la BD está vacía (primera vez)
+        // Crea los usuarios solo si no hay ninguno
         if (userRepository.count() == 0) {
-            // passwordEncoder.encode(): encripta la contraseña con BCrypt antes de guardarla
             userRepository.save(new User("admin", "admin@football.com",
                     passwordEncoder.encode("Admin123"), UserRole.ADMIN));
             userRepository.save(new User("user1", "user1@football.com",
                     passwordEncoder.encode("User123"), UserRole.USER));
         }
 
-        // Comprueba si ya existe "La Liga 2024-25" en la BD
-        // Si existe, no hace nada (los datos ya están cargados)
-        // Si no existe, borra todo y vuelve a crear los datos de prueba
+        // Si los torneos no están cargados, los crea
         boolean seeded = torneoRepository.findAll().stream()
                 .anyMatch(t -> t.getNome().equals("La Liga 2024-25"));
         if (!seeded) {
-            // Borra en orden para respetar las claves foráneas:
-            // primero los que dependen de otros (comentarios, partidos, relaciones)
+            // Borra en este orden para no romper las claves foráneas
             commentoRepository.deleteAll();
             partitaRepository.deleteAll();
-            torneoRepository.clearAllLinks(); // borra la tabla intermedia torneo_squadra
+            torneoRepository.clearAllLinks();
             torneoRepository.deleteAll();
             giocatoreRepository.deleteAll();
             arbitroRepository.deleteAll();
             squadraRepository.deleteAll();
-            seedData(); // crea todos los datos de prueba
+            seedData();
         }
 
         // Muestra un banner en la consola cuando la app está lista
@@ -70,23 +61,17 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("╚" + line + "╝\033[0m\n");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // seedData: crea todos los datos de prueba (3 torneos, 18 equipos, partidos...)
-    // ─────────────────────────────────────────────────────────────────────────
+    // Crea los torneos, equipos, jugadores, árbitros y partidos de prueba
     private void seedData() {
 
-        // Crea los 3 árbitros de prueba (uno por liga)
-        Arbitro cerro  = arb("Carlos",  "Del Cerro Grande", "ES-001"); // árbitro español
-        Arbitro oliver = arb("Michael", "Oliver",           "EN-001"); // árbitro inglés
-        Arbitro massa  = arb("Davide",  "Massa",            "IT-001"); // árbitro italiano
+        // Árbitros (uno por liga)
+        Arbitro cerro  = arb("Carlos",  "Del Cerro Grande", "ES-001");
+        Arbitro oliver = arb("Michael", "Oliver",           "EN-001");
+        Arbitro massa  = arb("Davide",  "Massa",            "IT-001");
 
-        // ── LA LIGA 2024-25 ──────────────────────────────────────────────────
-        // Crea el torneo y lo guarda en BD
+        // ── LA LIGA 2024-25 ──
         Torneo laLiga = torneo("La Liga 2024-25", 2025, "Spanish Primera División — 2024-25 season");
 
-        // Crea los 6 equipos de La Liga y sus jugadores
-        // club(): crea y guarda el equipo en BD
-        // p(): crea y guarda un jugador asignado a un equipo
         Squadra barca = club("FC Barcelona", 1899, "Barcelona");
         p(barca, "Marc-André",  "ter Stegen",    1992,  4, 30, "Portiere",       187);
         p(barca, "Iñaki",       "Peña",           1999,  3,  2, "Portiere",       190);
@@ -225,12 +210,9 @@ public class DataInitializer implements CommandLineRunner {
         p(betis, "Antony",   "Matheus",     2000,  6, 24, "Attaccante",     172);
         p(betis, "Willian",  "José",        1991, 11, 23, "Attaccante",     189);
 
-        // Asigna los 6 equipos al torneo La Liga y guarda en BD
         laLiga.getSquadre().addAll(List.of(barca, realMadrid, atletico, athletic, villarreal, betis));
         torneoRepository.save(laLiga);
 
-        // Crea los partidos de La Liga
-        // fixture(): crea un partido con resultado si está PLAYED, o sin resultado si está SCHEDULED
         fixture(laLiga, barca,     realMadrid, cerro,
                 LocalDateTime.of(2024, 10, 26, 16, 15), "Estadi Olímpic Lluís Companys, Barcelona",
                 4, 0, StatoPartita.PLAYED);
@@ -239,9 +221,9 @@ public class DataInitializer implements CommandLineRunner {
                 2, 1, StatoPartita.PLAYED);
         fixture(laLiga, villarreal, betis,      cerro,
                 LocalDateTime.of(2025,  8, 17, 19,  0), "Estadio de la Cerámica, Villarreal",
-                null, null, StatoPartita.SCHEDULED); // sin resultado todavía
+                null, null, StatoPartita.SCHEDULED);
 
-        // ── PREMIER LEAGUE 2024-25 ───────────────────────────────────────────
+        // ── PREMIER LEAGUE 2024-25 ──
         Torneo premierLeague = torneo("Premier League 2024-25", 2025, "English top division — 2024-25 season");
 
         Squadra liverpool = club("Liverpool FC", 1892, "Liverpool");
@@ -395,7 +377,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2025,  8, 16, 15,  0), "The City Ground, Nottingham",
                 null, null, StatoPartita.SCHEDULED);
 
-        // ── SERIE A 2024-25 ──────────────────────────────────────────────────
+        // ── SERIE A 2024-25 ──
         Torneo serieA = torneo("Serie A 2024-25", 2025, "Italian top division — 2024-25 season");
 
         Squadra napoli = club("SSC Napoli", 1926, "Naples");
@@ -550,42 +532,37 @@ public class DataInitializer implements CommandLineRunner {
                 null, null, StatoPartita.SCHEDULED);
     }
 
-    // ── Métodos auxiliares para simplificar la creación de datos ─────────────
+    // Métodos auxiliares para crear los datos más corto
 
-    // Crea y guarda un torneo en BD
     private Torneo torneo(String nome, int anno, String desc) {
         return torneoRepository.save(new Torneo(nome, anno, desc));
     }
 
-    // Crea y guarda un equipo en BD
     private Squadra club(String nome, int anno, String citta) {
         return squadraRepository.save(new Squadra(nome, anno, citta));
     }
 
-    // Crea y guarda un árbitro en BD
     private Arbitro arb(String nome, String cognome, String codice) {
         return arbitroRepository.save(new Arbitro(nome, cognome, codice));
     }
 
-    // Crea y guarda un jugador asignado a un equipo
-    // Parámetros: equipo, nombre, apellido, año/mes/día de nacimiento, posición, altura
+    // Crea un jugador y lo asigna a un equipo
     private void p(Squadra s, String nome, String cognome,
                    int y, int m, int d, String ruolo, int h) {
         giocatoreRepository.save(
                 new Giocatore(nome, cognome, LocalDate.of(y, m, d), ruolo, h, s));
     }
 
-    // Crea y guarda un partido
-    // Si está PLAYED, guarda también los goles; si está SCHEDULED, los goles quedan en 0
+    // Crea un partido; si está jugado guarda también los goles
     private void fixture(Torneo t, Squadra home, Squadra away, Arbitro a,
                          LocalDateTime dt, String luogo,
                          Integer gh, Integer ga, StatoPartita stato) {
-        Partita match = new Partita(dt, luogo, t, home, away, a); // crea el partido
+        Partita match = new Partita(dt, luogo, t, home, away, a);
         if (stato == StatoPartita.PLAYED) {
-            match.setGoalsHome(gh); // goles del equipo local
-            match.setGoalsAway(ga); // goles del equipo visitante
-            match.setStato(StatoPartita.PLAYED); // marca como jugado
+            match.setGoalsHome(gh);
+            match.setGoalsAway(ga);
+            match.setStato(StatoPartita.PLAYED);
         }
-        partitaRepository.save(match); // guarda en BD
+        partitaRepository.save(match);
     }
 }

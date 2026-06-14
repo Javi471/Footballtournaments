@@ -1,7 +1,6 @@
 package com.football.tournaments.service;
 
-import com.football.tournaments.model.Giocatore;
-import com.football.tournaments.model.Squadra;
+import com.football.tournaments.model.*;
 import com.football.tournaments.repository.GiocatoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

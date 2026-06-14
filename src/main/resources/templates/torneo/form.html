@@ -63,10 +63,10 @@
                     <label class="checkbox-item" th:each="s : ${tutteLeSquadre}">
                         <!-- name="squadraIds": el controller recibe una lista de ids seleccionados -->
                         <!-- th:value: valor del checkbox = id del equipo -->
+                        <!-- th:checked: marca la casilla si el equipo ya está en el torneo -->
+                        <!-- torneo.squadre.![id]: extrae la lista de ids de los equipos del torneo -->
+                        <!-- #lists.contains(...): comprueba si el id del equipo está en esa lista -->
                         <input type="checkbox" name="squadraIds" th:value="${s.id}"
-                               <!-- th:checked: marca la casilla si el equipo ya está en el torneo -->
-                               <!-- torneo.squadre.![id]: extrae la lista de ids de los equipos del torneo -->
-                               <!-- #lists.contains(...): comprueba si el id del equipo está en esa lista -->
                                th:checked="${torneo.squadre != null and #lists.contains(torneo.squadre.![id], s.id)}"/>
                         <span th:text="${s.nome} + ' (' + ${s.citta} + ')'"></span>
                     </label>

@@ -1,54 +1,54 @@
 # ⚽ Football Tournaments
 
-Sistema informativo su Web per la gestione di tornei di calcio amatoriale.  
-Progetto assegnato — SIW (Sistemi Informativi su Web) a.a. 2025/2026.
+Sistema web para la gestión de torneos de fútbol amateur.  
+Proyecto asignado — SIW (Sistemas Informáticos Web) a.a. 2025/2026.
 
 ---
 
-## Tecnologie
+## Tecnologías
 
-| Layer | Tecnologia |
-|-------|-----------|
+| Capa | Tecnología |
+|------|-----------|
 | Backend | Spring Boot 3.5, Java 21 |
-| Persistenza | JPA / Hibernate + PostgreSQL |
-| Frontend (principale) | Thymeleaf |
-| Frontend (classifica) | React 18 + Vite |
-| Sicurezza | Spring Security |
-| Database dev | Docker + PostgreSQL 15 |
+| Persistencia | JPA / Hibernate + PostgreSQL |
+| Frontend (principal) | Thymeleaf |
+| Frontend (clasificación) | React 18 + Vite |
+| Seguridad | Spring Security |
+| Base de datos (dev) | Docker + PostgreSQL 15 |
 
 ---
 
-## Funzionalità
+## Funcionalidades
 
-### Pubblico (senza login)
-- Lista di tutti i tornei
-- Dettaglio torneo (squadre + calendario partite)
-- Dettaglio squadra (rosa giocatori)
-- Classifica del torneo (componente React, aggiornamento dinamico)
+### Público (sin login)
+- Lista de todos los torneos
+- Detalle de torneo (equipos + calendario de partidos)
+- Detalle de equipo (plantilla de jugadores)
+- Clasificación del torneo (componente React, actualización dinámica)
 
-### Utenti registrati (USER)
-- Visualizzazione commenti sulle partite
-- Inserimento di un commento su una partita
-- Modifica del proprio commento
+### Usuarios registrados (USER)
+- Ver comentarios en los partidos
+- Añadir un comentario en un partido
+- Editar su propio comentario
 
-### Amministratore (ADMIN)
-- Creazione e modifica di tornei (con selezione squadre)
-- Inserimento e modifica di squadre
-- Inserimento e modifica di giocatori
-- Registrazione di una partita (con torneo, squadre, arbitro, data)
-- Inserimento del risultato di una partita
-- Eliminazione di squadre e partite
-- Gestione arbitri
+### Administrador (ADMIN)
+- Crear y editar torneos (con selección de equipos)
+- Crear y editar equipos (con subida de imagen)
+- Crear y editar jugadores
+- Registrar un partido (con torneo, equipos, árbitro, fecha)
+- Insertar el resultado de un partido
+- Eliminar equipos y partidos
+- Gestión de árbitros
 
 ---
 
-## Entità del dominio
+## Entidades del dominio
 
 ```
 Torneo      ←→  Squadra   (many-to-many)
 Squadra      →  Giocatore (one-to-many)
 Partita      →  Torneo    (many-to-one)
-Partita      →  Squadra   (home + away)
+Partita      →  Squadra   (local + visitante)
 Partita      →  Arbitro   (many-to-one)
 Commento     →  Partita   (many-to-one)
 Commento     →  User      (many-to-one)
@@ -56,18 +56,18 @@ Commento     →  User      (many-to-one)
 
 ---
 
-## Avvio del progetto
+## Arranque del proyecto
 
-### 1. Database (Docker)
+### 1. Base de datos (Docker)
 
 ```bash
 docker-compose up -d
 ```
 
-Crea il database PostgreSQL su `localhost:5432` con:
-- DB: `football_db`
-- User: `admin`
-- Password: `admin123`
+Crea la base de datos PostgreSQL en `localhost:5432` con:
+- BD: `football_db`
+- Usuario: `admin`
+- Contraseña: `admin123`
 
 ### 2. Backend (Spring Boot)
 
@@ -75,20 +75,20 @@ Crea il database PostgreSQL su `localhost:5432` con:
 ./mvnw spring-boot:run
 ```
 
-Oppure su Windows:
+En Windows:
 ```cmd
 mvnw.cmd spring-boot:run
 ```
 
-L'applicazione parte su **http://localhost:8080**
+La aplicación arranca en **http://localhost:8080**
 
-Utenti pre-caricati al primo avvio:
-| Username | Password | Ruolo |
-|----------|----------|-------|
-| admin | admin123 | ADMIN |
-| user1 | user123 | USER |
+Usuarios precargados en el primer arranque:
+| Username | Contraseña | Rol |
+|----------|------------|-----|
+| admin | Admin123 | ADMIN |
+| user1 | User123 | USER |
 
-### 3. Frontend React (sviluppo)
+### 3. Frontend React (desarrollo)
 
 ```bash
 cd frontend
@@ -96,7 +96,7 @@ npm install
 npm run dev    # → http://localhost:5173
 ```
 
-Per il build di produzione (genera il bundle in `static/react/`):
+Para compilar (genera el bundle en `static/react/`):
 
 ```bash
 cd frontend
@@ -105,59 +105,67 @@ npm run build
 
 ---
 
-## Struttura del progetto
+## Estructura del proyecto
 
 ```
 src/main/java/com/football/tournaments/
 ├── config/          # SecurityConfig, PasswordConfig, DataInitializer
-├── model/           # Entità JPA (Torneo, Squadra, Giocatore, Partita, Arbitro, Commento, User)
-├── repository/      # Interfacce Spring Data JPA
-├── service/         # Logica di business (@Transactional)
-└── controller/      # Controller Thymeleaf + REST (classifica)
+├── model/           # Entidades JPA (Torneo, Squadra, Giocatore, Partita, Arbitro, Commento, User)
+├── repository/      # Interfaces Spring Data JPA
+├── service/         # Lógica de negocio (@Transactional)
+└── controller/      # Controllers Thymeleaf + REST (clasificación)
 
 src/main/resources/
-├── templates/       # Template Thymeleaf
-│   ├── torneo/      # Lista, dettaglio, form, classifica
-│   ├── squadra/     # Lista, dettaglio, form
-│   ├── partita/     # Dettaglio, form, risultato
-│   ├── giocatore/   # Form
-│   ├── arbitro/     # Lista, form
-│   ├── commento/    # Form modifica
-│   └── auth/        # Login, register
+├── templates/       # Plantillas Thymeleaf
+│   ├── torneo/      # Lista, detalle, formulario, clasificación
+│   ├── squadra/     # Lista, detalle, formulario
+│   ├── partita/     # Detalle, formulario, resultado
+│   ├── giocatore/   # Formulario
+│   ├── arbitro/     # Lista, formulario
+│   ├── commento/    # Formulario de edición
+│   └── auth/        # Login, registro
 └── static/
-    ├── css/         # Stili globali
-    └── react/       # Bundle React compilato (classifica)
+    ├── css/         # Estilos globales
+    └── react/       # Bundle React compilado (clasificación)
 
 frontend/
 └── src/
-    └── classifica.jsx   # Componente React classifica dinamica
+    └── classifica.jsx   # Componente React para la clasificación dinámica
 ```
 
 ---
 
-## Analisi delle prestazioni (requisito 8.2)
+## Análisis de rendimiento (requisito 8.2)
 
-Nella classe `PartitaRepository` sono definite query con strategie diverse:
-- `findByTorneoOrderByDataOraAsc` → **LAZY** (N+1 potenziale)
-- `findByTorneoWithTeamsAndReferee` → **JOIN FETCH** (query singola con join)
-- `findByIdWithDetails` → **JOIN FETCH** per partita completa
+En `PartitaRepository` se definen consultas con distintas estrategias:
+- `findByTorneoOrderByDataOraAsc` → **LAZY** (problema N+1 potencial)
+- `findByTorneoWithTeamsAndReferee` → **JOIN FETCH** (consulta única con join)
+- `findByIdWithDetails` → **JOIN FETCH** para partido completo
 
-L'analisi sperimentale (da completare nell'orale) confronta i tempi di esecuzione
-tra strategia LAZY e JOIN FETCH su un dataset di 50+ partite.
+Resultados obtenidos con un dataset de partidos:
 
----
+| Estrategia | Tiempo | Consultas |
+|---|---|---|
+| LAZY (N+1) | 7.477 ms | 7 |
+| JOIN FETCH | 2.352 ms | 1 |
+| EntityGraph | 5.151 ms | 1 |
 
-## Sicurezza
-
-- Autenticazione form-based con Spring Security
-- Password hashate con BCrypt
-- Ruoli: `ROLE_USER`, `ROLE_ADMIN`
-- Endpoint admin protetti con `@PreAuthorize("hasRole('ADMIN')")`
-- CSRF attivo per pagine Thymeleaf, disabilitato per `/api/**`
+**Decisión:** se usa JOIN FETCH porque la consulta es explícita, verificable y siempre más rápida.
 
 ---
 
-## Consegna
+## Seguridad
 
-Inviare a `siw.roma3@gmail.com` entro le ore 18:00 del giorno precedente all'orale.  
-Oggetto: `[Giugno/Luglio 2026 PROGETTO DOCENTE] Cognome Matricola`
+- Autenticación con formulario (Spring Security)
+- Login con GitHub (OAuth2)
+- Contraseñas encriptadas con BCrypt
+- Roles: `ROLE_USER`, `ROLE_ADMIN`
+- Endpoints de admin protegidos con `@PreAuthorize("hasRole('ADMIN')")`
+- CSRF activo para páginas Thymeleaf, desactivado para `/api/**`
+
+---
+
+## Entrega
+
+Enviar a `siw.roma3@gmail.com` antes de las 18:00 del día anterior al examen oral.  
+Asunto: `[Junio/Julio 2026 PROGETTO DOCENTE] Apellido Matrícula`

@@ -1,8 +1,6 @@
 package com.football.tournaments.service;
 
-import com.football.tournaments.model.Commento;
-import com.football.tournaments.model.Partita;
-import com.football.tournaments.model.User;
+import com.football.tournaments.model.*;
 import com.football.tournaments.repository.CommentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -116,7 +116,7 @@ Plantillas creadas:
 **Fecha:** 25/05/2026
 
 - `DataInitializer` carga al primer arranque: usuario admin, usuario user1, torneos con equipos reales (La Liga, Premier League, Serie A), jugadores, árbitros y partidos
-- Las contraseñas se hashean automáticamente con BCrypt en el arranque (no se guardan en texto plano)
+- Las contraseñas se encriptan con BCrypt en `DataInitializer` usando `passwordEncoder.encode()` antes de guardarlas en BD (no se guardan en texto plano)
 - Creado `README.md` con documentación completa
 - Push inicial en GitHub: https://github.com/Javi471/Football-tournaments
 
@@ -255,8 +255,21 @@ npm run build
 
 ---
 
+## ✅ Paso 17 — Paginación y filtros (bonus)
+**Fecha:** 14/06/2026
+
+**Paginación:**
+- `SquadraController` → método `findPage(page, 4)` devuelve 4 equipos por página
+- `SquadraService` usa `PageRequest` de Spring Data JPA para paginar la consulta
+- `squadra/lista.html` → botones Anterior / Siguiente generados con `#numbers.sequence()` de Thymeleaf
+- Funciona tanto en la vista pública (`/squadre`) como en la vista admin (`/admin/squadre`)
+
+**Filtros (lado cliente):**
+- `squadra/dettaglio.html` → filtro por posición (Portero, Defensa, Centrocampista, Delantero) y ordenación por nombre/altura implementados en JavaScript en el lado del navegador
+- No requiere petición al servidor: filtra y ordena la lista de jugadores ya cargada en el HTML
+
+---
+
 ## 📋 Pendiente
-- [ ] Añadir más datos de prueba (más torneos, equipos, partidos)
-- [ ] Filtros de búsqueda para jugadores y partidos
 - [ ] Tests unitarios para los servicios
 - [ ] Verificación final y entrega por email a siw.roma3@gmail.com

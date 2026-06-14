@@ -101,11 +101,11 @@
                 <select name="squadraId" required>
                     <option value="">— Select team —</option>
                     <!-- th:each="s : ${squadre}": itera todos los equipos disponibles -->
+                    <!-- th:selected: marca como seleccionado el equipo actual del jugador -->
+                    <!-- Compara giocatore.squadra.id con el id del equipo de la iteración -->
                     <option th:each="s : ${squadre}"
                             th:value="${s.id}"
                             th:text="${s.nome} + ' (' + ${s.citta} + ')'"
-                            <!-- th:selected: marca como seleccionado el equipo actual del jugador -->
-                            <!-- Compara giocatore.squadra.id con el id del equipo de la iteración -->
                             th:selected="${giocatore.squadra != null and giocatore.squadra.id == s.id}">
                     </option>
                 </select>
