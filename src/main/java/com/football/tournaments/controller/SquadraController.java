@@ -58,6 +58,7 @@ public class SquadraController {
 
     // ── Public ────────────────────────────────────────────────────────────
 
+    // GET /squadre → lista paginada de equipos (4 por página)
     @GetMapping("/squadre")
     public String lista(@RequestParam(defaultValue = "0") int page, Model model) {
         page = max(0, page);
@@ -67,6 +68,7 @@ public class SquadraController {
         return "squadra/lista";
     }
 
+    // GET /squadre/{id} → detalle del equipo con su lista de jugadores
     @GetMapping("/squadre/{id}")
     public String dettaglio(@PathVariable Long id, Model model) {
         Squadra squadra = squadraService.findByIdWithGiocatori(id)
@@ -77,6 +79,7 @@ public class SquadraController {
 
     // ── Admin ─────────────────────────────────────────────────────────────
 
+    // GET /admin/squadre → lista paginada de equipos para el ADMIN
     @GetMapping("/admin/squadre")
     @PreAuthorize("hasRole('ADMIN')")
     public String listaAdmin(@RequestParam(defaultValue = "0") int page, Model model) {
@@ -87,6 +90,7 @@ public class SquadraController {
         return "squadra/lista";
     }
 
+    // GET /admin/squadre/{id} → detalle del equipo para el ADMIN
     @GetMapping("/admin/squadre/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String dettaglioAdmin(@PathVariable Long id, Model model) {
@@ -96,6 +100,7 @@ public class SquadraController {
         return "squadra/dettaglio";
     }
 
+    // GET /admin/squadre/nuova → formulario vacío para crear un equipo nuevo
     @GetMapping("/admin/squadre/nuova")
     @PreAuthorize("hasRole('ADMIN')")
     public String nuovaForm(Model model) {
@@ -103,6 +108,7 @@ public class SquadraController {
         return "squadra/form";
     }
 
+    // POST /admin/squadre/nuova → guarda el equipo nuevo con su imagen opcional
     @PostMapping("/admin/squadre/nuova")
     @PreAuthorize("hasRole('ADMIN')")
     public String nuovaSalva(@Valid @ModelAttribute Squadra squadra,
@@ -117,6 +123,7 @@ public class SquadraController {
         return "redirect:/admin/squadre/" + salvata.getId();
     }
 
+    // GET /admin/squadre/{id}/modifica → formulario relleno para editar el equipo
     @GetMapping("/admin/squadre/{id}/modifica")
     @PreAuthorize("hasRole('ADMIN')")
     public String modificaForm(@PathVariable Long id, Model model) {
@@ -125,6 +132,7 @@ public class SquadraController {
         return "squadra/form";
     }
 
+    // POST /admin/squadre/{id}/modifica → guarda los cambios del equipo editado
     @PostMapping("/admin/squadre/{id}/modifica")
     @PreAuthorize("hasRole('ADMIN')")
     public String modificaSalva(@PathVariable Long id,
@@ -145,6 +153,7 @@ public class SquadraController {
         return "redirect:/admin/squadre/" + id;
     }
 
+    // POST /admin/squadre/{id}/elimina → borra el equipo y sus jugadores
     @PostMapping("/admin/squadre/{id}/elimina")
     @PreAuthorize("hasRole('ADMIN')")
     public String elimina(@PathVariable Long id) {

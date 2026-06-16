@@ -1,54 +1,57 @@
 # ⚽ Football Tournaments
+Web system for managing amateur football tournaments.  
+Assigned project — Sistemi Informativi Su Web 2025/2026.
 
-Sistema web para la gestión de torneos de fútbol amateur.  
-Proyecto asignado — SIW (Sistemas Informáticos Web) a.a. 2025/2026.
-
+Created by:
+JAVIER AGUILERA ARCO
+77021357S
+MATRICOLA: 652476
 ---
 
-## Tecnologías
+## Technologies
 
-| Capa | Tecnología |
-|------|-----------|
+| Layer | Technology |
+|-------|-----------|
 | Backend | Spring Boot 3.5, Java 21 |
-| Persistencia | JPA / Hibernate + PostgreSQL |
-| Frontend (principal) | Thymeleaf |
-| Frontend (clasificación) | React 18 + Vite |
-| Seguridad | Spring Security |
-| Base de datos (dev) | Docker + PostgreSQL 15 |
+| Persistence | JPA / Hibernate + PostgreSQL |
+| Frontend (main) | Thymeleaf |
+| Frontend (standings) | React 18 + Vite |
+| Security | Spring Security |
+| Database (dev) | Docker + PostgreSQL 15 |
 
 ---
 
-## Funcionalidades
+## Features
 
-### Público (sin login)
-- Lista de todos los torneos
-- Detalle de torneo (equipos + calendario de partidos)
-- Detalle de equipo (plantilla de jugadores)
-- Clasificación del torneo (componente React, actualización dinámica)
+### Public (no login required)
+- List of all tournaments
+- Tournament detail (teams + match schedule)
+- Team detail (squad of players)
+- Tournament standings (React component, dynamic update)
 
-### Usuarios registrados (USER)
-- Ver comentarios en los partidos
-- Añadir un comentario en un partido
-- Editar su propio comentario
+### Registered users (USER)
+- View comments on matches
+- Add a comment on a match
+- Edit their own comment
 
-### Administrador (ADMIN)
-- Crear y editar torneos (con selección de equipos)
-- Crear y editar equipos (con subida de imagen)
-- Crear y editar jugadores
-- Registrar un partido (con torneo, equipos, árbitro, fecha)
-- Insertar el resultado de un partido
-- Eliminar equipos y partidos
-- Gestión de árbitros
+### Administrator (ADMIN)
+- Create and edit tournaments (with team selection)
+- Create and edit teams (with image upload)
+- Create and edit players
+- Register a match (with tournament, teams, referee, date)
+- Enter the result of a match
+- Delete teams and matches
+- Manage referees
 
 ---
 
-## Entidades del dominio
+## Domain entities
 
 ```
 Torneo      ←→  Squadra   (many-to-many)
 Squadra      →  Giocatore (one-to-many)
 Partita      →  Torneo    (many-to-one)
-Partita      →  Squadra   (local + visitante)
+Partita      →  Squadra   (home + away)
 Partita      →  Arbitro   (many-to-one)
 Commento     →  Partita   (many-to-one)
 Commento     →  User      (many-to-one)
@@ -56,18 +59,18 @@ Commento     →  User      (many-to-one)
 
 ---
 
-## Arranque del proyecto
+## Starting the project
 
-### 1. Base de datos (Docker)
+### 1. Database (Docker)
 
 ```bash
 docker-compose up -d
 ```
 
-Crea la base de datos PostgreSQL en `localhost:5432` con:
-- BD: `football_db`
-- Usuario: `admin`
-- Contraseña: `admin123`
+Creates the PostgreSQL database at `localhost:5432` with:
+- DB: `football_db`
+- User: `admin`
+- Password: `admin123`
 
 ### 2. Backend (Spring Boot)
 
@@ -75,20 +78,20 @@ Crea la base de datos PostgreSQL en `localhost:5432` con:
 ./mvnw spring-boot:run
 ```
 
-En Windows:
+On Windows:
 ```cmd
 mvnw.cmd spring-boot:run
 ```
 
-La aplicación arranca en **http://localhost:8080**
+The application starts at **http://localhost:8080**
 
-Usuarios precargados en el primer arranque:
-| Username | Contraseña | Rol |
-|----------|------------|-----|
+Pre-loaded users on first startup:
+| Username | Password | Role |
+|----------|----------|------|
 | admin | Admin123 | ADMIN |
 | user1 | User123 | USER |
 
-### 3. Frontend React (desarrollo)
+### 3. React Frontend (Only used during development)
 
 ```bash
 cd frontend
@@ -96,7 +99,7 @@ npm install
 npm run dev    # → http://localhost:5173
 ```
 
-Para compilar (genera el bundle en `static/react/`):
+To compile (generates the bundle in `static/react/`):
 
 ```bash
 cd frontend
@@ -105,67 +108,60 @@ npm run build
 
 ---
 
-## Estructura del proyecto
+## Project structure
 
 ```
 src/main/java/com/football/tournaments/
 ├── config/          # SecurityConfig, PasswordConfig, DataInitializer
-├── model/           # Entidades JPA (Torneo, Squadra, Giocatore, Partita, Arbitro, Commento, User)
-├── repository/      # Interfaces Spring Data JPA
-├── service/         # Lógica de negocio (@Transactional)
-└── controller/      # Controllers Thymeleaf + REST (clasificación)
+├── model/           # JPA entities (Torneo, Squadra, Giocatore, Partita, Arbitro, Commento, User)
+├── repository/      # Spring Data JPA interfaces
+├── service/         # Business logic (@Transactional)
+└── controller/      # Thymeleaf controllers + REST (standings)
 
 src/main/resources/
-├── templates/       # Plantillas Thymeleaf
-│   ├── torneo/      # Lista, detalle, formulario, clasificación
-│   ├── squadra/     # Lista, detalle, formulario
-│   ├── partita/     # Detalle, formulario, resultado
-│   ├── giocatore/   # Formulario
-│   ├── arbitro/     # Lista, formulario
-│   ├── commento/    # Formulario de edición
-│   └── auth/        # Login, registro
+├── templates/       # Thymeleaf templates
+│   ├── torneo/      # List, detail, form, standings
+│   ├── squadra/     # List, detail, form
+│   ├── partita/     # Detail, form, result
+│   ├── giocatore/   # Form
+│   ├── arbitro/     # List, form
+│   ├── commento/    # Edit form
+│   └── auth/        # Login, register
 └── static/
-    ├── css/         # Estilos globales
-    └── react/       # Bundle React compilado (clasificación)
+    ├── css/         # Global styles
+    └── react/       # Compiled React bundle (standings)
 
 frontend/
 └── src/
-    └── classifica.jsx   # Componente React para la clasificación dinámica
+    └── classifica.jsx   # React component for dynamic standings
 ```
 
 ---
 
-## Análisis de rendimiento (requisito 8.2)
+## Performance analysis (requirement 8.2)
 
-En `PartitaRepository` se definen consultas con distintas estrategias:
-- `findByTorneoOrderByDataOraAsc` → **LAZY** (problema N+1 potencial)
-- `findByTorneoWithTeamsAndReferee` → **JOIN FETCH** (consulta única con join)
-- `findByIdWithDetails` → **JOIN FETCH** para partido completo
+`PartitaRepository` defines queries with different strategies:
+- `findByTorneoOrderByDataOraAsc` → **LAZY** (potential N+1 problem)
+- `findByTorneoWithTeamsAndReferee` → **JOIN FETCH** (single query with join)
+- `findByIdWithDetails` → **JOIN FETCH** for full match detail
 
-Resultados obtenidos con un dataset de partidos:
+Results obtained with a dataset of matches:
 
-| Estrategia | Tiempo | Consultas |
-|---|---|---|
+| Strategy | Time | Queries |
+|----------|------|---------|
 | LAZY (N+1) | 7.477 ms | 7 |
 | JOIN FETCH | 2.352 ms | 1 |
 | EntityGraph | 5.151 ms | 1 |
 
-**Decisión:** se usa JOIN FETCH porque la consulta es explícita, verificable y siempre más rápida.
+**Decision:** JOIN FETCH is used because the query is explicit, verifiable and always faster.
 
 ---
 
-## Seguridad
+## Security
 
-- Autenticación con formulario (Spring Security)
-- Login con GitHub (OAuth2)
-- Contraseñas encriptadas con BCrypt
+- Form-based authentication (Spring Security)
+- GitHub login (OAuth2)
+- Passwords encrypted with BCrypt
 - Roles: `ROLE_USER`, `ROLE_ADMIN`
-- Endpoints de admin protegidos con `@PreAuthorize("hasRole('ADMIN')")`
-- CSRF activo para páginas Thymeleaf, desactivado para `/api/**`
-
----
-
-## Entrega
-
-Enviar a `siw.roma3@gmail.com` antes de las 18:00 del día anterior al examen oral.  
-Asunto: `[Junio/Julio 2026 PROGETTO DOCENTE] Apellido Matrícula`
+- Admin endpoints protected with `@PreAuthorize("hasRole('ADMIN')")`
+- CSRF enabled for Thymeleaf pages, disabled for `/api/**`

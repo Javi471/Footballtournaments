@@ -1,253 +1,253 @@
-# Javi.md — Diario de desarrollo
+# Javi.md — Development Diary
 
-Registro de todos los pasos realizados durante el desarrollo del proyecto **Football Tournaments**.
-
----
-
-## ✅ Paso 1 — Configuración inicial del proyecto
-**Fecha:** 25/05/2026
-
-- Creado el repositorio GitHub: https://github.com/Javi471/Football-tournaments.git
-- Conectado el proyecto local al repositorio remoto con `git remote add origin`
-- Leído el PDF del proyecto asignado por el profesor (páginas 1-6)
-- Analizada la estructura del proyecto de referencia como esqueleto base
+Record of all steps taken during the development of the **Football Tournaments** project.
 
 ---
 
-## ✅ Paso 2 — Estructura del proyecto y configuración
-**Fecha:** 25/05/2026
+## ✅ Step 1 — Initial project setup
+**Date:** 25/05/2026
 
-- Creado `pom.xml` con dependencias Spring Boot 3.5, JPA, Security, Thymeleaf, PostgreSQL, Lombok, Dotenv
-- Configurado `application.properties` con parámetros de BD via variables de entorno (`.env`)
-- Creado `docker-compose.yml` para la base de datos PostgreSQL 15
-- Añadido `.gitignore` apropiado para Java/Maven/Node
-
----
-
-## ✅ Paso 3 — Modelo de datos (entidades JPA)
-**Fecha:** 25/05/2026
-
-Entidades creadas en el paquete `model/`:
-- `Torneo` — nombre, año, descripción → relación many-to-many con Squadra
-- `Squadra` — nombre, annoFondazione, ciudad → relación one-to-many con Giocatore
-- `Giocatore` — nombre, apellido, fechaNacimiento, posición, altura → pertenece a Squadra
-- `Partita` — fechaHora, lugar, golesLocal, golesVisitante, estado (SCHEDULED/PLAYED/CANCELLED)
-- `Arbitro` — nombre, apellido, codigoArbitral
-- `Commento` — texto, fechaCreacion → conectado a User y Partita
-- `User` — username, contraseña (BCrypt), rol (USER/ADMIN)
+- Created GitHub repository: https://github.com/Javi471/Football-tournaments.git
+- Connected local project to remote repository with `git remote add origin`
+- Read the project PDF assigned by the professor (pages 1-6)
+- Analysed the reference project structure as a base skeleton
 
 ---
 
-## ✅ Paso 4 — Repositorios (capa de persistencia)
-**Fecha:** 25/05/2026
+## ✅ Step 2 — Project structure and configuration
+**Date:** 25/05/2026
 
-Repositorios creados con Spring Data JPA:
-- `TorneoRepository` — consultas personalizadas con `JOIN FETCH` para equipos y partidos
+- Created `pom.xml` with Spring Boot 3.5, JPA, Security, Thymeleaf, PostgreSQL, Lombok, Dotenv dependencies
+- Configured `application.properties` with DB parameters via environment variables (`.env`)
+- Created `docker-compose.yml` for PostgreSQL 15 database
+- Added appropriate `.gitignore` for Java/Maven/Node
+
+---
+
+## ✅ Step 3 — Data model (JPA entities)
+**Date:** 25/05/2026
+
+Entities created in the `model/` package:
+- `Torneo` — name, year, description → many-to-many relationship with Squadra
+- `Squadra` — name, annoFondazione, city → one-to-many relationship with Giocatore
+- `Giocatore` — name, surname, birthDate, position, height → belongs to Squadra
+- `Partita` — dateTime, location, homeGoals, awayGoals, status (SCHEDULED/PLAYED/CANCELLED)
+- `Arbitro` — name, surname, refereeCode
+- `Commento` — text, creationDate → connected to User and Partita
+- `User` — username, password (BCrypt), role (USER/ADMIN)
+
+---
+
+## ✅ Step 4 — Repositories (persistence layer)
+**Date:** 25/05/2026
+
+Repositories created with Spring Data JPA:
+- `TorneoRepository` — custom queries with `JOIN FETCH` for teams and matches
 - `SquadraRepository` — `findByIdWithGiocatori` (JOIN FETCH anti-N+1)
-- `PartitaRepository` — múltiples consultas: LAZY, JOIN FETCH, EntityGraph (para análisis de rendimiento)
+- `PartitaRepository` — multiple queries: LAZY, JOIN FETCH, EntityGraph (for performance analysis)
 - `GiocatoreRepository`, `ArbitroRepository`, `CommentoRepository`, `UserRepository`
 
 ---
 
-## ✅ Paso 5 — Capa de servicios (lógica de negocio)
-**Fecha:** 25/05/2026
+## ✅ Step 5 — Service layer (business logic)
+**Date:** 25/05/2026
 
-Servicios creados con anotaciones `@Transactional`:
-- Operaciones de solo lectura → `@Transactional(readOnly = true)`
-- Operaciones de escritura → `@Transactional`
-- `PartitaService` incluye cálculo de clasificación (puntos, victorias, empates, derrotas, diferencia de goles)
-- `UserService` implementa `UserDetailsService` para Spring Security
-
----
-
-## ✅ Paso 6 — Capa de controladores
-**Fecha:** 25/05/2026
-
-Controladores creados:
-- `AuthController` — login, registro
-- `TorneoController` — CRUD torneos (público + admin), integración clasificación
-- `SquadraController` — CRUD equipos (público + admin)
-- `GiocatoreController` — CRUD jugadores (solo admin)
-- `PartitaController` — registro partido, inserción resultado, detalle con comentarios
-- `ArbitroController` — CRUD árbitros (solo admin)
-- `CommentoController` — añadir y modificar comentarios (usuarios registrados)
-- `ClassificaRestController` — API REST `/api/tornei/{id}/classifica` para React
+Services created with `@Transactional` annotations:
+- Read-only operations → `@Transactional(readOnly = true)`
+- Write operations → `@Transactional`
+- `PartitaService` includes standings calculation (points, wins, draws, losses, goal difference)
+- `UserService` implements `UserDetailsService` for Spring Security
 
 ---
 
-## ✅ Paso 7 — Seguridad
-**Fecha:** 25/05/2026
+## ✅ Step 6 — Controller layer
+**Date:** 25/05/2026
 
-- `SecurityConfig` con reglas para roles USER y ADMIN
-- `PasswordConfig` con BCryptPasswordEncoder
-- Endpoints públicos: `/tornei/**`, `/squadre/**`, `/partite/**` (GET), `/api/tornei/**`
-- Endpoints protegidos: `/commenti/**` (autenticados), `/admin/**` (ADMIN)
-- CSRF activado para Thymeleaf, ignorado para `/api/**`
+Controllers created:
+- `AuthController` — login, registration
+- `TorneoController` — tournament CRUD (public + admin), standings integration
+- `SquadraController` — team CRUD (public + admin)
+- `GiocatoreController` — player CRUD (admin only)
+- `PartitaController` — match registration, result entry, detail with comments
+- `ArbitroController` — referee CRUD (admin only)
+- `CommentoController` — add and edit comments (registered users)
+- `ClassificaRestController` — REST API `/api/tornei/{id}/classifica` for React
 
 ---
 
-## ✅ Paso 8 — Plantillas Thymeleaf (Frontend)
-**Fecha:** 25/05/2026
+## ✅ Step 7 — Security
+**Date:** 25/05/2026
 
-Plantillas creadas:
-- `fragments/layout.html` — navbar común con Thymeleaf Security
+- `SecurityConfig` with rules for USER and ADMIN roles
+- `PasswordConfig` with BCryptPasswordEncoder
+- Public endpoints: `/tornei/**`, `/squadre/**`, `/partite/**` (GET), `/api/tornei/**`
+- Protected endpoints: `/commenti/**` (authenticated), `/admin/**` (ADMIN)
+- CSRF enabled for Thymeleaf, ignored for `/api/**`
+
+---
+
+## ✅ Step 8 — Thymeleaf templates (Frontend)
+**Date:** 25/05/2026
+
+Templates created:
+- `fragments/layout.html` — common navbar with Thymeleaf Security
 - `auth/login.html`, `auth/register.html`
 - `torneo/lista.html`, `torneo/dettaglio.html`, `torneo/form.html`, `torneo/classifica.html`
 - `squadra/lista.html`, `squadra/dettaglio.html`, `squadra/form.html`
 - `giocatore/form.html`
-- `partita/dettaglio.html` (con sección comentarios), `partita/form.html`, `partita/risultato.html`
+- `partita/dettaglio.html` (with comments section), `partita/form.html`, `partita/risultato.html`
 - `arbitro/lista.html`, `arbitro/form.html`
 - `commento/form.html`
 
 ---
 
-## ✅ Paso 9 — Frontend React (Clasificación)
-**Fecha:** 25/05/2026
+## ✅ Step 9 — React Frontend (Standings)
+**Date:** 25/05/2026
 
-- Creado componente `frontend/src/classifica.jsx`
-- La clasificación se carga dinámicamente mediante fetch en `/api/tornei/{id}/classifica`
-- Tabla con: posición (medallas), equipo, PJ, V, E, D, GF, GC, DG, Puntos
-- Build con Vite → salida en `src/main/resources/static/react/classifica.js`
-- Integración: la plantilla Thymeleaf monta `#classifica-root` con `data-torneo-id`
-
----
-
-## ✅ Paso 10 — Datos iniciales y GitHub
-**Fecha:** 25/05/2026
-
-- `DataInitializer` carga al primer arranque: usuario admin, usuario user1, torneos con equipos reales (La Liga, Premier League, Serie A), jugadores, árbitros y partidos
-- Las contraseñas se encriptan con BCrypt en `DataInitializer` usando `passwordEncoder.encode()` antes de guardarlas en BD (no se guardan en texto plano)
-- Creado `README.md` con documentación completa
-- Push inicial en GitHub: https://github.com/Javi471/Football-tournaments
+- Created component `frontend/src/classifica.jsx`
+- Standings are loaded dynamically via fetch to `/api/tornei/{id}/classifica`
+- Table with: position (medals), team, MP, W, D, L, GF, GA, GD, Points
+- Build with Vite → output in `src/main/resources/static/react/classifica.js`
+- Integration: Thymeleaf template mounts `#classifica-root` with `data-torneo-id`
 
 ---
 
-## ✅ Paso 11 — Sistema de diseño (Tema oscuro/teal)
-**Fecha:** 26/05/2026
+## ✅ Step 10 — Initial data and GitHub
+**Date:** 25/05/2026
 
-- **Paleta**: dark ink (`#161A1F`), teal accent (`#2BB7A8`), paper (`#F4F6F7`)
-- **Fuentes**: Bebas Neue (títulos) + Manrope (texto)
-- **`style.css`**: reescritura completa con variables CSS y todos los componentes:
-  navbar sticky blur, card-grid, table-wrap, badges de colores, form-card, alerts, etc.
-- **`index.html`**: página de inicio con animación SVG de futbolista
-- **`layout.html`**: navbar con logo SVG, pill de admin, botón de registro
-- Todos los templates rediseñados con el nuevo sistema
+- `DataInitializer` loads on first startup: admin user, user1, tournaments with real teams (La Liga, Premier League, Serie A), players, referees and matches
+- Passwords are encrypted with BCrypt in `DataInitializer` using `passwordEncoder.encode()` before saving to DB (never stored in plain text)
+- Created `README.md` with full documentation
+- Initial push to GitHub: https://github.com/Javi471/Football-tournaments
 
 ---
 
-## ✅ Paso 12 — Análisis de rendimiento JPA (punto 8.2)
-**Fecha:** 27/05/2026
+## ✅ Step 11 — Design system (Dark/teal theme)
+**Date:** 26/05/2026
 
-Comparación de 3 estrategias para cargar partidos con sus equipos y árbitro:
+- **Palette**: dark ink (`#161A1F`), teal accent (`#2BB7A8`), paper (`#F4F6F7`)
+- **Fonts**: Bebas Neue (headings) + Manrope (body text)
+- **`style.css`**: complete rewrite with CSS variables and all components:
+  sticky blur navbar, card-grid, table-wrap, colour badges, form-card, alerts, etc.
+- **`index.html`**: home page with footballer SVG animation
+- **`layout.html`**: navbar with SVG logo, admin pill, registration button
+- All templates redesigned with the new system
 
-**Estrategia 1 — LAZY (problema N+1)**
-- Carga la lista con 1 consulta, pero por cada partido hace 3 consultas extra (equipo local, visitante, árbitro)
-- Con N partidos → `1 + N×3` consultas. Con 10 partidos = 31 consultas. Muy lento.
+---
 
-**Estrategia 2 — JOIN FETCH**
-- Una sola consulta SQL con JOIN que trae todo de golpe → siempre 1 consulta
+## ✅ Step 12 — JPA performance analysis (requirement 8.2)
+**Date:** 27/05/2026
 
-**Estrategia 3 — EntityGraph**
-- Mismo resultado que JOIN FETCH pero declarativo con anotaciones, más flexible
+Comparison of 3 strategies for loading matches with their teams and referee:
 
-**Resultados obtenidos:**
+**Strategy 1 — LAZY (N+1 problem)**
+- Loads the list with 1 query, but makes 3 extra queries per match (home team, away team, referee)
+- With N matches → `1 + N×3` queries. With 10 matches = 31 queries. Very slow.
+
+**Strategy 2 — JOIN FETCH**
+- A single SQL query with JOIN that fetches everything at once → always 1 query
+
+**Strategy 3 — EntityGraph**
+- Same result as JOIN FETCH but declarative with annotations, more flexible
+
+**Results obtained:**
 ```
-LAZY (N+1)  →  7.477 ms  │  7 consultas  │  1.00x (base)
-JOIN FETCH  →  2.352 ms  │  1 consulta   │  3.18x más rápido
-EntityGraph →  5.151 ms  │  1 consulta   │  1.45x más rápido
+LAZY (N+1)  →  7.477 ms  │  7 queries  │  1.00x (base)
+JOIN FETCH  →  2.352 ms  │  1 query    │  3.18x faster
+EntityGraph →  5.151 ms  │  1 query    │  1.45x faster
 ```
-**Decisión:** Se usa JOIN FETCH en los repositorios porque las asociaciones son siempre las mismas y la consulta es explícita y verificable.
+**Decision:** JOIN FETCH is used in repositories because the associations are always the same and the query is explicit and verifiable.
 
 ---
 
-## ✅ Paso 13 — Subida de imágenes para equipos (bonus)
-**Fecha:** 13/06/2026
+## ✅ Step 13 — Image upload for teams (bonus)
+**Date:** 13/06/2026
 
-Implementación del bonus de subida de imágenes para equipos:
+Implementation of the bonus image upload feature for teams:
 
-**Archivos modificados:**
-- `Squadra.java` → añadido campo `imagePath` (ruta de la imagen en disco)
-- `SquadraController.java` → añadido método `salvaImmagine()` que guarda el archivo en `src/main/resources/static/images/squadre/`
-- `squadra/form.html` → añadido `enctype="multipart/form-data"` y campo `<input type="file">`
-- `squadra/dettaglio.html` → muestra la imagen del equipo en la cabecera
-- `squadra/lista.html` → muestra la imagen en la tarjeta de cada equipo
-- `application.properties` → añadido límite de 10MB para archivos subidos
-- Creado `src/main/resources/static/images/squadre/.gitkeep` para que la carpeta exista en Git
+**Modified files:**
+- `Squadra.java` → added `imagePath` field (path to image on disk)
+- `SquadraController.java` → added `salvaImmagine()` method that saves the file to `src/main/resources/static/images/squadre/`
+- `squadra/form.html` → added `enctype="multipart/form-data"` and `<input type="file">` field
+- `squadra/dettaglio.html` → displays the team image in the header
+- `squadra/lista.html` → displays the image on each team card
+- `application.properties` → added 10MB limit for uploaded files
+- Created `src/main/resources/static/images/squadre/.gitkeep` so the folder exists in Git
 
-**Error corregido (500 en Windows):**
-- Problema: `file.transferTo()` falla con rutas relativas en Windows
-- Solución: usar `Files.copy(file.getInputStream(), destino, REPLACE_EXISTING)` con ruta absoluta basada en `System.getProperty("user.dir")`
-
----
-
-## ✅ Paso 14 — Login con OAuth2 (GitHub)
-**Fecha:** 13/06/2026
-
-Implementación del bonus de autenticación OAuth2 con GitHub:
-
-**Archivos modificados:**
-- `pom.xml` → añadida dependencia `spring-boot-starter-oauth2-client`
-- `UserRepository.java` → añadido método `findByEmail()`
-- `SecurityConfig.java` → añadido `.oauth2Login()` con `CustomOAuth2UserService`
-- `application.properties` → añadida configuración de GitHub OAuth2
-- `.env` → añadidas variables `GITHUB_CLIENT_ID` y `GITHUB_CLIENT_SECRET`
-- `login.html` → añadido botón "Login with GitHub"
-
-**Archivo nuevo creado:**
-- `CustomOAuth2UserService.java` → recibe los datos de GitHub, busca el usuario en la BD por email y si no existe lo crea con `password="OAUTH2_NO_PASSWORD"` (placeholder que BCrypt siempre rechaza en el login normal)
-
-**Error corregido (500 al volver de GitHub):**
-- Problema: columna `password` en PostgreSQL seguía siendo `NOT NULL` aunque pusimos `null` en Java
-- Solución: usar placeholder `"OAUTH2_NO_PASSWORD"` en vez de `null` → la BD acepta el valor y BCrypt nunca lo valida como contraseña válida
-
-**Cómo funciona:**
-1. Usuario hace clic en "Login with GitHub"
-2. GitHub pide autorización al usuario
-3. GitHub redirige de vuelta con un código
-4. Spring intercambia el código por los datos del usuario (email, nombre)
-5. `CustomOAuth2UserService` busca/crea el usuario en la BD
-6. El usuario queda autenticado con `ROLE_USER`
+**Bug fixed (500 on Windows):**
+- Problem: `file.transferTo()` fails with relative paths on Windows
+- Solution: use `Files.copy(file.getInputStream(), destino, REPLACE_EXISTING)` with absolute path based on `System.getProperty("user.dir")`
 
 ---
 
-## ✅ Paso 15 — Limpieza y correcciones
-**Fecha:** 13/06/2026
+## ✅ Step 14 — OAuth2 login (GitHub)
+**Date:** 13/06/2026
 
-- `PartitaController.java` → eliminados imports y campos sin usar (`@Valid`, `BindingResult`, `userService`, variable `salvata`)
-- `application.properties` → eliminada propiedad `spring.devtools.restart.enabled` no reconocida por VS Code
-- `pom.xml` → actualizado Spring Boot de `3.5.0` a `3.5.14` (última versión de parche)
-- `Hash.java` → eliminado del proyecto (era una utilidad de un solo uso para generar hashes BCrypt; las contraseñas ya se hashean automáticamente en `DataInitializer.java`)
-- Añadidos comentarios en español en todos los archivos de configuración y test
+Implementation of the OAuth2 authentication bonus with GitHub:
+
+**Modified files:**
+- `pom.xml` → added `spring-boot-starter-oauth2-client` dependency
+- `UserRepository.java` → added `findByEmail()` method
+- `SecurityConfig.java` → added `.oauth2Login()` with `CustomOAuth2UserService`
+- `application.properties` → added GitHub OAuth2 configuration
+- `.env` → added `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` variables
+- `login.html` → added "Login with GitHub" button
+
+**New file created:**
+- `CustomOAuth2UserService.java` → receives GitHub data, looks up the user in the DB by email and creates them if they don't exist with `password="OAUTH2_NO_PASSWORD"` (a placeholder that BCrypt always rejects on normal login)
+
+**Bug fixed (500 on return from GitHub):**
+- Problem: `password` column in PostgreSQL was still `NOT NULL` even though we set `null` in Java
+- Solution: use placeholder `"OAUTH2_NO_PASSWORD"` instead of `null` → DB accepts the value and BCrypt never validates it as a valid password
+
+**How it works:**
+1. User clicks "Login with GitHub"
+2. GitHub asks the user for authorisation
+3. GitHub redirects back with a code
+4. Spring exchanges the code for the user's data (email, name)
+5. `CustomOAuth2UserService` finds or creates the user in the DB
+6. The user is authenticated with `ROLE_USER`
 
 ---
 
-## ✅ Paso 16 — Integración real de React en la página de clasificación
-**Fecha:** 14/06/2026
+## ✅ Step 15 — Cleanup and fixes
+**Date:** 13/06/2026
 
-Hasta ahora React existía pero no estaba conectado: la tabla la dibujaba Thymeleaf directamente.
-Se ha completado la integración para que sea React quien dibuje la tabla:
+- `PartitaController.java` → removed unused imports and fields (`@Valid`, `BindingResult`, `userService`, `salvata` variable)
+- `application.properties` → removed `spring.devtools.restart.enabled` property not recognised by VS Code
+- `pom.xml` → updated Spring Boot from `3.5.0` to `3.5.14` (latest patch version)
+- `Hash.java` → removed from project (was a one-time utility to generate BCrypt hashes; passwords are now hashed automatically in `DataInitializer.java`)
+- Added Spanish comments across all configuration and test files
 
-**Archivos modificados:**
-- `frontend/vite.config.js` → añadida sección `build` para compilar `classifica.jsx` como librería IIFE
-  - Entrada: `src/classifica.jsx`
-  - Salida: `src/main/resources/static/react/classifica.js`
-  - Formato `iife`: el archivo se ejecuta solo al cargarse, sin necesitar módulos
-- `torneo/classifica.html` → eliminada la tabla Thymeleaf; sustituida por:
-  - `<div id="classifica-root" data-torneo-id="...">` (donde React monta la tabla)
-  - `<script src="/react/classifica.js">` (el bundle compilado de React)
+---
 
-**Archivo nuevo generado:**
-- `src/main/resources/static/react/classifica.js` → bundle compilado con Vite (React + tabla incluidos)
+## ✅ Step 16 — Real React integration in the standings page
+**Date:** 14/06/2026
 
-**Cómo funciona ahora:**
-1. Usuario abre `/tornei/{id}/classifica`
-2. Spring Boot devuelve `classifica.html` (Thymeleaf) con el div vacío y el id del torneo
-3. El navegador carga y ejecuta `classifica.js`
-4. React lee el `data-torneo-id` del div y llama a `/api/tornei/{id}/classifica`
-5. Spring Boot responde con JSON (puntos, victorias, goles...)
-6. React dibuja la tabla dentro del div
+Until now React existed but was not connected: the table was drawn directly by Thymeleaf.
+The integration has been completed so that React draws the table:
 
-**Comando para recompilar React si se modifica classifica.jsx:**
+**Modified files:**
+- `frontend/vite.config.js` → added `build` section to compile `classifica.jsx` as an IIFE library
+  - Entry: `src/classifica.jsx`
+  - Output: `src/main/resources/static/react/classifica.js`
+  - Format `iife`: the file runs itself on load, without needing modules
+- `torneo/classifica.html` → removed Thymeleaf table; replaced with:
+  - `<div id="classifica-root" data-torneo-id="...">` (where React mounts the table)
+  - `<script src="/react/classifica.js">` (the compiled React bundle)
+
+**New file generated:**
+- `src/main/resources/static/react/classifica.js` → bundle compiled with Vite (React + table included)
+
+**How it works now:**
+1. User opens `/tornei/{id}/classifica`
+2. Spring Boot returns `classifica.html` (Thymeleaf) with the empty div and tournament id
+3. Browser loads and runs `classifica.js`
+4. React reads the `data-torneo-id` from the div and calls `/api/tornei/{id}/classifica`
+5. Spring Boot responds with JSON (points, wins, goals...)
+6. React draws the table inside the div
+
+**Command to recompile React if classifica.jsx is modified:**
 ```
 cd frontend
 npm run build
@@ -255,21 +255,21 @@ npm run build
 
 ---
 
-## ✅ Paso 17 — Paginación y filtros (bonus)
-**Fecha:** 14/06/2026
+## ✅ Step 17 — Pagination and filters (bonus)
+**Date:** 14/06/2026
 
-**Paginación:**
-- `SquadraController` → método `findPage(page, 4)` devuelve 4 equipos por página
-- `SquadraService` usa `PageRequest` de Spring Data JPA para paginar la consulta
-- `squadra/lista.html` → botones Anterior / Siguiente generados con `#numbers.sequence()` de Thymeleaf
-- Funciona tanto en la vista pública (`/squadre`) como en la vista admin (`/admin/squadre`)
+**Pagination:**
+- `SquadraController` → `findPage(page, 4)` method returns 4 teams per page
+- `SquadraService` uses Spring Data JPA's `PageRequest` to paginate the query
+- `squadra/lista.html` → Previous / Next buttons generated with Thymeleaf's `#numbers.sequence()`
+- Works in both the public view (`/squadre`) and the admin view (`/admin/squadre`)
 
-**Filtros (lado cliente):**
-- `squadra/dettaglio.html` → filtro por posición (Portero, Defensa, Centrocampista, Delantero) y ordenación por nombre/altura implementados en JavaScript en el lado del navegador
-- No requiere petición al servidor: filtra y ordena la lista de jugadores ya cargada en el HTML
+**Filters (client side):**
+- `squadra/dettaglio.html` → filter by position (Goalkeeper, Defender, Midfielder, Forward) and sorting by name/height implemented in JavaScript on the browser side
+- No server request needed: filters and sorts the player list already loaded in the HTML
 
 ---
 
-## 📋 Pendiente
-- [ ] Tests unitarios para los servicios
-- [ ] Verificación final y entrega por email a siw.roma3@gmail.com
+## 📋 Pending
+- [ ] Unit tests for services
+- [ ] Final verification and submission by email to siw.roma3@gmail.com

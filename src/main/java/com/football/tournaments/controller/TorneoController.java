@@ -22,12 +22,14 @@ public class TorneoController {
 
     // ── Rutas públicas ──
 
+    // GET /tornei → muestra la lista de todos los torneos
     @GetMapping("/tornei")
     public String lista(Model model) {
         model.addAttribute("tornei", torneoService.findAll());
         return "torneo/lista";
     }
 
+    // GET /tornei/{id} → muestra el detalle de un torneo con sus partidos
     @GetMapping("/tornei/{id}")
     public String dettaglio(@PathVariable Long id, Model model) {
         Torneo torneo = torneoService.findByIdWithSquadre(id)
@@ -61,6 +63,7 @@ public class TorneoController {
 
     // ── Rutas de administrador (solo ADMIN) ──
 
+    // GET /admin/tornei → lista de torneos para el panel de administración
     @GetMapping("/admin/tornei")
     @PreAuthorize("hasRole('ADMIN')")
     public String listaAdmin(Model model) {
@@ -68,6 +71,7 @@ public class TorneoController {
         return "torneo/lista";
     }
 
+    // GET /admin/tornei/{id} → detalle del torneo para el ADMIN
     @GetMapping("/admin/tornei/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String dettaglioAdmin(@PathVariable Long id, Model model) {
@@ -126,6 +130,7 @@ public class TorneoController {
         return "torneo/form";
     }
 
+    // POST /admin/tornei/{id}/modifica → guarda los cambios del torneo editado
     @PostMapping("/admin/tornei/{id}/modifica")
     @PreAuthorize("hasRole('ADMIN')")
     public String modificaSalva(@PathVariable Long id,
@@ -145,6 +150,7 @@ public class TorneoController {
         return "redirect:/admin/tornei/" + id;
     }
 
+    // POST /admin/tornei/{id}/elimina → borra el torneo y todo lo relacionado
     @PostMapping("/admin/tornei/{id}/elimina")
     @PreAuthorize("hasRole('ADMIN')")
     public String elimina(@PathVariable Long id) {
